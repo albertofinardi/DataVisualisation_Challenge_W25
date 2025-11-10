@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "DataViz",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

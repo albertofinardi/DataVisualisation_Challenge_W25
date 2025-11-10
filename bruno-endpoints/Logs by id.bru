@@ -1,0 +1,20 @@
+meta {
+  name: Logs by id
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:3000/api/data/participants/{{id}}/status-logs
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  id: 0
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
