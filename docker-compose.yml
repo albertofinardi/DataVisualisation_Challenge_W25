@@ -12,12 +12,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./data:/data
-      - ./data/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    shm_size: '2gb'
     networks:
       - vast-network
 

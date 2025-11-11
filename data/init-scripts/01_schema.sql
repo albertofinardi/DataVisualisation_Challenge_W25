@@ -253,10 +253,15 @@ CREATE TABLE financial_journal (
 CREATE TABLE travel_journal (
     id SERIAL PRIMARY KEY,
     participant_id INTEGER NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    start_location GEOMETRY(POINT),
-    end_location GEOMETRY(POINT),
-    travel_type VARCHAR(50),
+    travel_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    travel_start_location_id INTEGER,
+    travel_end_time TIMESTAMP WITH TIME ZONE,
+    travel_end_location_id INTEGER,
+    purpose VARCHAR(100),
+    check_in_time TIMESTAMP WITH TIME ZONE,
+    check_out_time TIMESTAMP WITH TIME ZONE,
+    starting_balance DECIMAL(10, 2),
+    ending_balance DECIMAL(10, 2),
     FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
 );
 

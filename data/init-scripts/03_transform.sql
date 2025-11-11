@@ -4,6 +4,15 @@
 
 DO $$ BEGIN RAISE NOTICE '=== [STAGE 2/3] TRANSFORMING AND LOADING DATA (cleaning types, handling NULLs) ==='; END $$;
 
+-- Drop foreign key constraints and indexes temporarily for faster bulk inserts
+DO $$ BEGIN RAISE NOTICE '→ Temporarily dropping constraints and indexes for faster import...'; END $$;
+ALTER TABLE participant_status_logs DROP CONSTRAINT IF EXISTS participant_status_logs_participant_id_fkey;
+ALTER TABLE participant_status_logs DROP CONSTRAINT IF EXISTS participant_status_logs_apartment_id_fkey;
+ALTER TABLE participant_status_logs DROP CONSTRAINT IF EXISTS participant_status_logs_job_id_fkey;
+DROP INDEX IF EXISTS idx_participant_status_logs_participant_id;
+DROP INDEX IF EXISTS idx_participant_status_logs_timestamp;
+DO $$ BEGIN RAISE NOTICE '✓ Constraints and indexes dropped'; END $$;
+
 -- Import Participants
 DO $$ BEGIN RAISE NOTICE '[1/11] Transforming Participants...'; END $$;
 INSERT INTO participants (participant_id, household_size, have_kids, age, education_level, interest_group, joviality)
@@ -113,6 +122,23 @@ FROM participant_status_logs_staging
 WHERE currentLocation ~ '^POINT\s*\(';  -- Only insert rows with valid POINT format
 DO $$ BEGIN RAISE NOTICE '✓ ParticipantStatusLogs transformed'; END $$;
 
+-- Re-add foreign key constraints and indexes
+DO $$ BEGIN RAISE NOTICE '→ Re-adding constraints and rebuilding indexes...'; END $$;
+ALTER TABLE participant_status_logs
+    ADD CONSTRAINT participant_status_logs_participant_id_fkey
+    FOREIGN KEY (participant_id) REFERENCES participants(participant_id);
+ALTER TABLE participant_status_logs
+    ADD CONSTRAINT participant_status_logs_apartment_id_fkey
+    FOREIGN KEY (apartment_id) REFERENCES apartments(apartment_id);
+ALTER TABLE participant_status_logs
+    ADD CONSTRAINT participant_status_logs_job_id_fkey
+    FOREIGN KEY (job_id) REFERENCES jobs(job_id);
+
+-- Rebuild indexes
+CREATE INDEX idx_participant_status_logs_participant_id ON participant_status_logs(participant_id);
+CREATE INDEX idx_participant_status_logs_timestamp ON participant_status_logs(timestamp);
+DO $$ BEGIN RAISE NOTICE '✓ Constraints and indexes restored'; END $$;
+
 -- Import Checkin Journal
 INSERT INTO checkin_journal (participant_id, timestamp, venue_id, venue_type)
 SELECT
@@ -132,16 +158,30 @@ SELECT
 FROM financial_journal_staging;
 
 -- Import Social Network
+DO $$ BEGIN RAISE NOTICE '[10/11] Transforming SocialNetwork...'; END $$;
 INSERT INTO social_network (participant_id, friend_id)
 SELECT
     CAST(participantIdFrom AS INTEGER),
     CAST(participantIdTo AS INTEGER)
 FROM social_network_staging;
+DO $$ BEGIN RAISE NOTICE '✓ SocialNetwork transformed'; END $$;
 
--- Import Travel Journal (note: actual CSV has different structure than expected)
--- The CSV doesn't have geometry points directly, it has location IDs
--- We'll need to adjust the schema or transformation logic
--- For now, skipping travel journal import as it needs schema redesign
+-- Import Travel Journal
+DO $$ BEGIN RAISE NOTICE '[11/11] Transforming TravelJournal...'; END $$;
+INSERT INTO travel_journal (participant_id, travel_start_time, travel_start_location_id, travel_end_time, travel_end_location_id, purpose, check_in_time, check_out_time, starting_balance, ending_balance)
+SELECT
+    CAST(participantId AS INTEGER),
+    travelStartTime::TIMESTAMP,
+    CASE WHEN travelStartLocationId = 'NA' OR travelStartLocationId = '' OR travelStartLocationId IS NULL THEN NULL ELSE CAST(travelStartLocationId AS INTEGER) END,
+    travelEndTime::TIMESTAMP,
+    CASE WHEN travelEndLocationId = 'NA' OR travelEndLocationId = '' OR travelEndLocationId IS NULL THEN NULL ELSE CAST(travelEndLocationId AS INTEGER) END,
+    purpose,
+    checkInTime::TIMESTAMP,
+    checkOutTime::TIMESTAMP,
+    CAST(startingBalance AS DECIMAL(10,2)),
+    CAST(endingBalance AS DECIMAL(10,2))
+FROM travel_journal_staging;
+DO $$ BEGIN RAISE NOTICE '✓ TravelJournal transformed'; END $$;
 
 DO $$ BEGIN RAISE NOTICE '=== STAGE 2/3 COMPLETE: All data transformed and loaded ==='; END $$;
 
