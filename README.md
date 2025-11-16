@@ -69,9 +69,11 @@ docker compose up --build -d
 
 ### For Team Members: Quick Setup
 
-A DB dump is present in the Releases of the git project.
-If someone shares a database dump file with you:
-
+A DB dump is present in the Releases of the git project. It's provided as chunks of 2GB each, to reconstruct use
+```bash
+cat vast_db_dump_split_* > restored_dump.sql.gz
+```
+To import it
 ```bash
 # 1. Place the dump file in db-exports/ folder
 # 2. Run the restore script
@@ -91,7 +93,12 @@ Create a dump file to share with others:
 ./export-database.sh
 ```
 
-This creates a compressed SQL dump in `db-exports/` folder. Share this file with your team.
+This creates a compressed SQL dump in `db-exports/` folder. If needed to upload a new version, split into chucks of max 2GB:
+
+```bash
+split -b 2000m <filename> vast_db_dump_split_
+```
+And upload the chunks in a new release.
 
 ## Architecture
 
