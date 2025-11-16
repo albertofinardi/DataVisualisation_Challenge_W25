@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # Export PostgreSQL database to SQL dump file
-# This creates a logical backup of the database content
-
 set -e
 
 EXPORT_DIR="./db-exports"
@@ -11,6 +9,7 @@ EXPORT_FILE="vast_db_dump_${TIMESTAMP}.sql.gz"
 CONTAINER_NAME="vast-postgres"
 DB_NAME="vast_challenge"
 DB_USER="postgres"
+DB_PASSWORD="postgres"
 
 echo "================================================"
 echo "PostgreSQL Database Export Tool"
@@ -31,13 +30,12 @@ echo "📦 Exporting database: $DB_NAME"
 echo "📂 Export file: $EXPORT_DIR/$EXPORT_FILE"
 echo ""
 
-# Export the database using pg_dump
-# --no-owner: Don't output ownership commands
-# --no-acl: Don't output access control lists
-# --clean: Don't include DROP commands (kartoza/postgis already has extensions)
-# We use --schema=public to avoid dumping PostGIS extension schemas
-docker exec "$CONTAINER_NAME" bash -c \
-    "PGPASSWORD=postgres pg_dump -h localhost -U postgres -d $DB_NAME --no-owner --no-acl --schema=public" | \
+# Export using pg_dump with custom format (more reliable than SQL format)
+docker exec "$CONTAINER_NAME" sh -c \
+    "PGPASSWORD=$DB_PASSWORD pg_dump -h localhost -U $DB_USER -d $DB_NAME \
+    --format=custom \
+    --no-owner \
+    --no-acl" | \
     gzip > "$EXPORT_DIR/$EXPORT_FILE"
 
 FILE_SIZE=$(du -h "$EXPORT_DIR/$EXPORT_FILE" | cut -f1)
@@ -47,5 +45,5 @@ echo "📊 File size: $FILE_SIZE"
 echo "📁 Location: $EXPORT_DIR/$EXPORT_FILE"
 echo ""
 echo "To restore this backup:"
-echo "  ./import-database.sh $EXPORT_FILE"
+echo "  ./restore-database.sh $EXPORT_FILE"
 echo ""

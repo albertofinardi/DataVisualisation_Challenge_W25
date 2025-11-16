@@ -1,11 +1,13 @@
 #!/bin/bash
 
-# Simple, bulletproof database restore script
-# Works by placing the dump file where postgres will auto-import it
-
+# Restore PostgreSQL database from dump file
 set -e
 
 EXPORT_DIR="./db-exports"
+CONTAINER_NAME="vast-postgres"
+DB_NAME="vast_challenge"
+DB_USER="postgres"
+DB_PASSWORD="postgres"
 
 echo "================================================"
 echo "Database Restore Tool"
@@ -59,17 +61,28 @@ echo "🚀 Starting PostgreSQL..."
 docker-compose up -d postgres
 
 echo "⏳ Waiting for PostgreSQL to be ready..."
-sleep 5
-until docker exec vast-postgres pg_isready -U postgres > /dev/null 2>&1; do
-    echo "  Waiting..."
+MAX_RETRIES=30
+RETRY_COUNT=0
+until docker exec "$CONTAINER_NAME" sh -c "PGPASSWORD=$DB_PASSWORD pg_isready -h localhost -U $DB_USER" > /dev/null 2>&1; do
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "❌ Error: PostgreSQL failed to start after ${MAX_RETRIES} attempts"
+        echo "Check logs with: docker logs $CONTAINER_NAME"
+        exit 1
+    fi
+    echo "  Waiting... (attempt $RETRY_COUNT/$MAX_RETRIES)"
     sleep 2
 done
 echo "✅ PostgreSQL is ready"
 echo ""
 
+echo "⏳ Waiting for authentication system to initialize..."
+sleep 5
+echo ""
+
 echo "📥 Importing database (this may take 10-15 minutes)..."
-gunzip -c "$IMPORT_FILE" | docker exec -i vast-postgres bash -c \
-    "PGPASSWORD=postgres psql -h localhost -U postgres -d vast_challenge -q"
+gunzip -c "$IMPORT_FILE" | docker exec -i "$CONTAINER_NAME" sh -c \
+    "PGPASSWORD=$DB_PASSWORD pg_restore -h localhost -U $DB_USER -d $DB_NAME --clean --if-exists --no-owner --no-acl"
 
 echo ""
 echo "✅ Restore complete!"
