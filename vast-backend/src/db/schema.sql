@@ -1,162 +1,183 @@
--- Database schema for VAST Challenge data
+-- Simplified SQLite schema matching actual CSV column names
+-- With SpatiaLite spatial support
 
--- Drop existing tables if they exist
-DROP TABLE IF EXISTS participant_status_logs CASCADE;
-DROP TABLE IF EXISTS checkin_journal CASCADE;
-DROP TABLE IF EXISTS financial_journal CASCADE;
-DROP TABLE IF EXISTS travel_journal CASCADE;
-DROP TABLE IF EXISTS social_network CASCADE;
-DROP TABLE IF EXISTS participants CASCADE;
-DROP TABLE IF EXISTS apartments CASCADE;
-DROP TABLE IF EXISTS buildings CASCADE;
-DROP TABLE IF EXISTS jobs CASCADE;
-DROP TABLE IF EXISTS employers CASCADE;
-DROP TABLE IF EXISTS pubs CASCADE;
-DROP TABLE IF EXISTS restaurants CASCADE;
-DROP TABLE IF EXISTS schools CASCADE;
+-- Initialize SpatiaLite
+SELECT InitSpatialMetadata(1);
 
--- Participants table
+-- Drop tables
+DROP TABLE IF EXISTS participant_status_logs;
+DROP TABLE IF EXISTS checkin_journal;
+DROP TABLE IF EXISTS financial_journal;
+DROP TABLE IF EXISTS travel_journal;
+DROP TABLE IF EXISTS social_network;
+DROP TABLE IF EXISTS apartments;
+DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS pubs;
+DROP TABLE IF EXISTS restaurants;
+DROP TABLE IF EXISTS schools;
+DROP TABLE IF EXISTS employers;
+DROP TABLE IF EXISTS participants;
+DROP TABLE IF EXISTS buildings;
+DROP TABLE IF EXISTS buildingUnits;
+
+-- Core tables
 CREATE TABLE participants (
-    participant_id INTEGER PRIMARY KEY,
-    household_size INTEGER,
-    have_kids BOOLEAN,
+    participantId INTEGER PRIMARY KEY,
+    householdSize INTEGER,
+    haveKids BOOLEAN,
     age INTEGER,
-    education_level VARCHAR(50),
-    interest_group VARCHAR(10),
-    joviality DECIMAL(10, 9)
+    educationLevel TEXT CHECK (educationLevel IN ('Low', 'HighSchoolOrCollege', 'Bachelors', 'Graduate')),
+    interestGroup TEXT CHECK (interestGroup IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J')),
+    joviality REAL
 );
 
--- Buildings table
 CREATE TABLE buildings (
-    building_id INTEGER PRIMARY KEY,
-    location GEOMETRY(POLYGON),
-    building_type VARCHAR(50),
-    max_occupancy INTEGER,
-    units INTEGER[]
+    buildingId INTEGER PRIMARY KEY,
+    buildingType TEXT CHECK (buildingType IN ('Commercial', 'Residental', 'School')),
+    maxOccupancy INTEGER
 );
 
--- Apartments table
+CREATE TABLE buildingUnits (
+    buildingId INTEGER NOT NULL,
+    unitId INTEGER NOT NULL,
+    PRIMARY KEY (buildingId, unitId)
+    --F OREIGN KEY (buildingId) REFERENCES buildings(buildingId)
+);
+
 CREATE TABLE apartments (
-    apartment_id INTEGER PRIMARY KEY,
-    building_id INTEGER,
-    max_occupancy INTEGER,
-    rent DECIMAL(10, 2),
-    FOREIGN KEY (building_id) REFERENCES buildings(building_id)
+    apartmentId INTEGER PRIMARY KEY,
+    rentalCost REAL,
+    maxOccupancy INTEGER,
+    numberOfRooms INTEGER,
+    buildingId INTEGER NOT NULL
+    --FOREIGN KEY (buildingId) REFERENCES buildings(buildingId)
 );
 
--- Employers table
 CREATE TABLE employers (
-    employer_id INTEGER PRIMARY KEY,
-    building_id INTEGER,
-    employer_name VARCHAR(100),
-    FOREIGN KEY (building_id) REFERENCES buildings(building_id)
+    employerId INTEGER PRIMARY KEY,
+    buildingId INTEGER NOT NULL
+    --FOREIGN KEY (buildingId) REFERENCES buildings(buildingId)
 );
 
--- Jobs table
 CREATE TABLE jobs (
-    job_id INTEGER PRIMARY KEY,
-    employer_id INTEGER,
-    hourly_rate DECIMAL(10, 2),
-    start_time TIME,
-    end_time TIME,
-    days_of_week VARCHAR(50),
-    education_requirement VARCHAR(50),
-    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
+    jobId INTEGER PRIMARY KEY,
+    employerId INTEGER NOT NULL,
+    hourlyRate REAL,
+    startTime TIME,
+    endTime TIME,
+    daysToWork TEXT,
+    worksMonday BOOLEAN,
+    worksTuesday BOOLEAN,
+    worksWednesday BOOLEAN,
+    worksThursday BOOLEAN,
+    worksFriday BOOLEAN,
+    worksSaturday BOOLEAN,
+    worksSunday BOOLEAN,
+    educationRequirement TEXT CHECK (educationRequirement IN ('Low', 'HighSchoolOrCollege', 'Bachelors', 'Graduate'))
+    --FOREIGN KEY (employerId) REFERENCES employers(employerId)
 );
 
--- Pubs table
 CREATE TABLE pubs (
-    pub_id INTEGER PRIMARY KEY,
-    building_id INTEGER,
-    pub_name VARCHAR(100),
-    food_cost DECIMAL(10, 2),
-    FOREIGN KEY (building_id) REFERENCES buildings(building_id)
+    pubId INTEGER PRIMARY KEY,
+    hourlyCost REAL,
+    maxOccupancy INTEGER,
+    buildingId INTEGER NOT NULL
+    --FOREIGN KEY (buildingId) REFERENCES buildings(buildingId)
 );
 
--- Restaurants table
 CREATE TABLE restaurants (
-    restaurant_id INTEGER PRIMARY KEY,
-    building_id INTEGER,
-    restaurant_name VARCHAR(100),
-    food_cost DECIMAL(10, 2),
-    FOREIGN KEY (building_id) REFERENCES buildings(building_id)
+    restaurantId INTEGER PRIMARY KEY,
+    foodCost REAL,
+    maxOccupancy INTEGER,
+    buildingId INTEGER NOT NULL
+    --FOREIGN KEY (buildingId) REFERENCES buildings(buildingId)
 );
 
--- Schools table
 CREATE TABLE schools (
-    school_id INTEGER PRIMARY KEY,
-    building_id INTEGER,
-    school_name VARCHAR(100),
-    monthly_cost DECIMAL(10, 2),
-    FOREIGN KEY (building_id) REFERENCES buildings(building_id)
+    schoolId INTEGER PRIMARY KEY,
+    monthlyCost REAL,
+    maxEnrollment INTEGER,
+    buildingId INTEGER NOT NULL
+    --FOREIGN KEY (buildingId) REFERENCES buildings(buildingId)
 );
 
--- Participant Status Logs table (Activity Logs)
+-- Activity logs
 CREATE TABLE participant_status_logs (
-    id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    current_location GEOMETRY(POINT),
-    participant_id INTEGER NOT NULL,
-    current_mode VARCHAR(50),
-    hunger_status VARCHAR(50),
-    sleep_status VARCHAR(50),
-    apartment_id INTEGER,
-    available_balance DECIMAL(10, 2),
-    job_id INTEGER,
-    financial_status VARCHAR(50),
-    daily_food_budget DECIMAL(10, 2),
-    weekly_extra_budget DECIMAL(10, 2),
-    FOREIGN KEY (participant_id) REFERENCES participants(participant_id),
-    FOREIGN KEY (apartment_id) REFERENCES apartments(apartment_id),
-    FOREIGN KEY (job_id) REFERENCES jobs(job_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME,
+    participantId INTEGER NOT NULL,
+    currentMode TEXT CHECK (currentMode IN ('AtHome', 'AtRecreation', 'Transport', 'AtRestaurant', 'AtWork')),
+    hungerStatus TEXT,
+    sleepStatus TEXT,
+    apartmentId INTEGER,
+    availableBalance REAL,
+    jobId INTEGER,
+    financialStatus TEXT,
+    dailyFoodBudget REAL,
+    weeklyExtraBudget REAL
+    --FOREIGN KEY (participantId) REFERENCES participants(participantId),
+    --FOREIGN KEY (apartmentId) REFERENCES apartments(apartmentId),
+    --FOREIGN KEY (jobId) REFERENCES jobs(jobId)
 );
 
--- Checkin Journal table
 CREATE TABLE checkin_journal (
-    id SERIAL PRIMARY KEY,
-    participant_id INTEGER NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    venue_id INTEGER,
-    venue_type VARCHAR(50),
-    FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    participantId INTEGER NOT NULL,
+    timestamp DATETIME,
+    venueId INTEGER NOT NULL,
+    venueType TEXT CHECK (venueType IN ('Apartment', 'Pub', 'Restaurant', 'Workplace'))
+    --FOREIGN KEY (participantId) REFERENCES participants(participantId)
 );
 
--- Financial Journal table
 CREATE TABLE financial_journal (
-    id SERIAL PRIMARY KEY,
-    participant_id INTEGER NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    category VARCHAR(50),
-    amount DECIMAL(10, 2),
-    FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    participantId INTEGER NOT NULL,
+    timestamp DATETIME,
+    category TEXT CHECK (category IN ('Education', 'Food', 'Recreation', 'RentAdjustment', 'Shelter', 'Wage')),
+    amount REAL
 );
 
--- Travel Journal table
 CREATE TABLE travel_journal (
-    id SERIAL PRIMARY KEY,
-    participant_id INTEGER NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    start_location GEOMETRY(POINT),
-    end_location GEOMETRY(POINT),
-    travel_type VARCHAR(50),
-    FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    participantId INTEGER NOT NULL,
+    travelStartTime DATETIME,
+    travelEndTime DATETIME,
+    travelStartLocationId INTEGER NOT NULL,
+    travelEndLocationId INTEGER NOT NULL,
+    purpose TEXT CHECK (purpose IN ('Coming Back From Restaurant', 'Eating', 'Going Back to Home', 'Recreation (Social Gathering)', 'Work/Home Commute')),
+    checkInTime DATETIME,
+    checkOutTime DATETIME,
+    startingBalance REAL,
+    endingBalance REAL
+
+    --FOREIGN KEY (participantId) REFERENCES participants(participantId),
+    --FOREIGN KEY (travelStartLocationId) REFERENCES buildings(buildingId),
+    --FOREIGN KEY (travelEndLocationId) REFERENCES buildings(buildingId)
 );
 
--- Social Network table
 CREATE TABLE social_network (
-    id SERIAL PRIMARY KEY,
-    participant_id INTEGER NOT NULL,
-    friend_id INTEGER NOT NULL,
-    FOREIGN KEY (participant_id) REFERENCES participants(participant_id),
-    FOREIGN KEY (friend_id) REFERENCES participants(participant_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME,
+    participantIdFrom INTEGER NOT NULL,
+    participantIdTo INTEGER NOT NULL
+    --FOREIGN KEY (participantIdFrom) REFERENCES participants(participantId),
+    --FOREIGN KEY (participantIdTo) REFERENCES participants(participantId)
 );
 
--- Create indexes for better query performance
-CREATE INDEX idx_participant_status_logs_participant_id ON participant_status_logs(participant_id);
-CREATE INDEX idx_participant_status_logs_timestamp ON participant_status_logs(timestamp);
-CREATE INDEX idx_checkin_journal_participant_id ON checkin_journal(participant_id);
-CREATE INDEX idx_checkin_journal_timestamp ON checkin_journal(timestamp);
-CREATE INDEX idx_financial_journal_participant_id ON financial_journal(participant_id);
-CREATE INDEX idx_financial_journal_timestamp ON financial_journal(timestamp);
-CREATE INDEX idx_travel_journal_participant_id ON travel_journal(participant_id);
-CREATE INDEX idx_travel_journal_timestamp ON travel_journal(timestamp);
+-- Add SpatiaLite geometry columns
+SELECT AddGeometryColumn('buildings', 'location', 4326, 'POLYGON', 'XY');
+SELECT AddGeometryColumn('apartments', 'location', 4326, 'POINT', 'XY');
+SELECT AddGeometryColumn('employers', 'location', 4326, 'POINT', 'XY');
+SELECT AddGeometryColumn('pubs', 'location', 4326, 'POINT', 'XY');
+SELECT AddGeometryColumn('restaurants', 'location', 4326, 'POINT', 'XY');
+SELECT AddGeometryColumn('schools', 'location', 4326, 'POINT', 'XY');
+SELECT AddGeometryColumn('participant_status_logs', 'currentLocation', 4326, 'POINT', 'XY');
+
+-- Create spatial indexes for performance
+SELECT CreateSpatialIndex('buildings', 'location');
+SELECT CreateSpatialIndex('apartments', 'location');
+SELECT CreateSpatialIndex('employers', 'location');
+SELECT CreateSpatialIndex('pubs', 'location');
+SELECT CreateSpatialIndex('restaurants', 'location');
+SELECT CreateSpatialIndex('schools', 'location');
+SELECT CreateSpatialIndex('participant_status_logs', 'currentLocation');

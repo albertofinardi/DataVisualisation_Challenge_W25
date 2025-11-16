@@ -1,0 +1,14 @@
+services:
+  # Data importer - just loads CSV into SQLite
+  data-importer:
+    build:
+      context: ./vast-backend
+      dockerfile: Dockerfile
+    container_name: vast-data-importer
+    environment:
+      DB_PATH: /app/data/vast_challenge.db
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  sqlite_data:

@@ -1,6 +1,10 @@
 import fs from 'fs';
 import csvParser from 'csv-parser';
-import pool from '../config/database';
+import db from '../config/database';
+
+// Set to true to only import first 10 rows for testing
+const TEST_MODE = false;
+const TEST_LIMIT = 10;
 
 interface ParticipantRow {
   participantId: string;
@@ -12,9 +16,17 @@ interface ParticipantRow {
   joviality: string;
 }
 
+interface BuildingRow {
+  buildingId: string;
+  location: string; // POLYGON WKT
+  buildingType: string;
+  maxOccupancy: string;
+  units: string; // JSON array like "[481,498,534]"
+}
+
 interface ParticipantStatusLogRow {
   timestamp: string;
-  currentLocation: string;
+  currentLocation: string; // POINT WKT
   participantId: string;
   currentMode: string;
   hungerStatus: string;
@@ -40,66 +52,116 @@ interface FinancialJournalRow {
   category: string;
   amount: string;
 }
-
-// Helper function to parse WKT POINT to PostGIS format
-function parsePoint(wkt: string): string {
-  if (!wkt || wkt === '') return 'NULL';
-  // WKT format: POINT (x y)
-  const match = wkt.match(/POINT\s*\(([^)]+)\)/i);
-  if (!match) return 'NULL';
-  return `ST_GeomFromText('${wkt}', 0)`;
+/*
+interface ApartmentRow {
+  apartmentId: string;
+  rentalCost: string;
+  maxOccupancy: string; // Note: CSV has trailing space
+  numberOfRooms: string;
+  location: string; // POINT WKT
+  buildingId: string;
 }
 
-// Helper function to parse WKT POLYGON to PostGIS format
-function parsePolygon(wkt: string): string {
-  if (!wkt || wkt === '') return 'NULL';
-  return `ST_GeomFromText('${wkt.replace(/'/g, "''")}', 0)`;
+interface EmployerRow {
+  employerId: string;
+  location: string; // POINT WKT
+  buildingId: string;
 }
 
-// Helper function to parse array fields
-function parseArray(value: string): string {
-  if (!value || value === '') return 'NULL';
-  // Remove brackets and parse
-  const cleanValue = value.replace(/[\[\]]/g, '');
-  if (cleanValue === '') return 'NULL';
-  return `'{${cleanValue}}'`;
+interface JobRow {
+  jobId: string;
+  employerId: string;
+  hourlyRate: string;
+  startTime: string;
+  endTime: string;
+  daysToWork: string; // JSON array like "[Monday,Tuesday,...]"
+  educationRequirement: string;
 }
 
+interface PubRow {
+  pubId: string;
+  hourlyCost: string;
+  maxOccupancy: string;
+  location: string; // POINT WKT
+  buildingId: string;
+}
+
+interface RestaurantRow {
+  restaurantId: string;
+  foodCost: string;
+  maxOccupancy: string;
+  location: string; // POINT WKT
+  buildingId: string;
+}
+
+interface SchoolRow {
+  schoolId: string;
+  monthlyCost: string;
+  maxEnrollment: string;
+  location: string; // POINT WKT
+  buildingId: string;
+}
+
+interface TravelJournalRow {
+  participantId: string;
+  travelStartTime: string;
+  travelStartLocationId: string;
+  travelEndTime: string;
+  travelEndLocationId: string;
+  purpose: string;
+  checkInTime: string;
+  checkOutTime: string;
+  startingBalance: string;
+  endingBalance: string;
+}
+
+interface SocialNetworkRow {
+  timestamp: string;
+  participantIdFrom: string;
+  participantIdTo: string;
+}
+*/
 export async function importParticipants(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const rows: ParticipantRow[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
+          const stmt = db.prepare(
+            `INSERT INTO participants (participantId, householdSize, haveKids, age, educationLevel, interestGroup, joviality)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT (participantId) DO NOTHING`
+          );
 
-          for (const row of rows) {
-            await client.query(
-              `INSERT INTO participants (participant_id, household_size, have_kids, age, education_level, interest_group, joviality)
-               VALUES ($1, $2, $3, $4, $5, $6, $7)
-               ON CONFLICT (participant_id) DO NOTHING`,
-              [
+          const insertMany = db.transaction((rows: ParticipantRow[]) => {
+            for (const row of rows) {
+              stmt.run(
                 parseInt(row.participantId),
                 parseInt(row.householdSize),
-                row.haveKids.toUpperCase() === 'TRUE',
+                row.haveKids.toUpperCase() === 'TRUE' ? 1 : 0,
                 parseInt(row.age),
                 row.educationLevel,
                 row.interestGroup,
                 parseFloat(row.joviality)
-              ]
-            );
-            imported++;
-          }
+              );
+              imported++;
+            }
+          });
 
-          client.release();
-          console.log(`Imported ${imported} participants`);
+          insertMany(rows);
+          console.log(`Imported ${imported} participants${TEST_MODE ? ' (TEST MODE - limited to ' + TEST_LIMIT + ' rows)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
@@ -110,26 +172,32 @@ export async function importParticipants(filePath: string): Promise<number> {
 export async function importParticipantStatusLogs(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const rows: ParticipantStatusLogRow[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
+          const stmt = db.prepare(
+            `INSERT INTO participant_status_logs
+             (timestamp, currentLocation, participantId, currentMode, hungerStatus,
+              sleepStatus, apartmentId, availableBalance, jobId, financialStatus,
+              dailyFoodBudget, weeklyExtraBudget)
+             VALUES (?, GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          );
 
-          for (const row of rows) {
-            const location = parsePoint(row.currentLocation);
-
-            await client.query(
-              `INSERT INTO participant_status_logs
-               (timestamp, current_location, participant_id, current_mode, hunger_status,
-                sleep_status, apartment_id, available_balance, job_id, financial_status,
-                daily_food_budget, weekly_extra_budget)
-               VALUES ($1, ${location}, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-              [
+          const insertMany = db.transaction((rows: ParticipantStatusLogRow[]) => {
+            for (const row of rows) {
+              stmt.run(
                 row.timestamp,
+                row.currentLocation || null,
                 parseInt(row.participantId),
                 row.currentMode,
                 row.hungerStatus,
@@ -140,16 +208,16 @@ export async function importParticipantStatusLogs(filePath: string): Promise<num
                 row.financialStatus,
                 row.dailyFoodBudget ? parseFloat(row.dailyFoodBudget) : null,
                 row.weeklyExtraBudget ? parseFloat(row.weeklyExtraBudget) : null
-              ]
-            );
-            imported++;
-          }
+              );
+              imported++;
+            }
+          });
 
-          client.release();
-          console.log(`Imported ${imported} status logs from ${filePath}`);
+          insertMany(rows);
+          const fileName = filePath.split('/').pop();
+          console.log(`Imported ${imported} status logs from ${fileName}${TEST_MODE ? ' (TEST MODE)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
@@ -160,34 +228,40 @@ export async function importParticipantStatusLogs(filePath: string): Promise<num
 export async function importCheckinJournal(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const rows: CheckinJournalRow[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
+          const stmt = db.prepare(
+            `INSERT INTO checkin_journal (participantId, timestamp, venueId, venueType)
+             VALUES (?, ?, ?, ?)`
+          );
 
-          for (const row of rows) {
-            await client.query(
-              `INSERT INTO checkin_journal (participant_id, timestamp, venue_id, venue_type)
-               VALUES ($1, $2, $3, $4)`,
-              [
+          const insertMany = db.transaction((rows: CheckinJournalRow[]) => {
+            for (const row of rows) {
+              stmt.run(
                 parseInt(row.participantId),
                 row.timestamp,
                 row.venueId ? parseInt(row.venueId) : null,
                 row.venueType
-              ]
-            );
-            imported++;
-          }
+              );
+              imported++;
+            }
+          });
 
-          client.release();
-          console.log(`Imported ${imported} checkin journal entries`);
+          insertMany(rows);
+          console.log(`Imported ${imported} checkin journal entries${TEST_MODE ? ' (TEST MODE)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
@@ -198,34 +272,40 @@ export async function importCheckinJournal(filePath: string): Promise<number> {
 export async function importFinancialJournal(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const rows: FinancialJournalRow[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
+          const stmt = db.prepare(
+            `INSERT INTO financial_journal (participantId, timestamp, category, amount)
+             VALUES (?, ?, ?, ?)`
+          );
 
-          for (const row of rows) {
-            await client.query(
-              `INSERT INTO financial_journal (participant_id, timestamp, category, amount)
-               VALUES ($1, $2, $3, $4)`,
-              [
+          const insertMany = db.transaction((rows: FinancialJournalRow[]) => {
+            for (const row of rows) {
+              stmt.run(
                 parseInt(row.participantId),
                 row.timestamp,
                 row.category,
                 parseFloat(row.amount)
-              ]
-            );
-            imported++;
-          }
+              );
+              imported++;
+            }
+          });
 
-          client.release();
-          console.log(`Imported ${imported} financial journal entries`);
+          insertMany(rows);
+          console.log(`Imported ${imported} financial journal entries${TEST_MODE ? ' (TEST MODE)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
@@ -235,38 +315,63 @@ export async function importFinancialJournal(filePath: string): Promise<number> 
 
 export async function importBuildings(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
-    const rows: any[] = [];
+    const rows: BuildingRow[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
+          const buildingStmt = db.prepare(
+            `INSERT INTO buildings (buildingId, buildingType, maxOccupancy, location)
+             VALUES (?, ?, ?, GeomFromText(?, 4326))
+             ON CONFLICT (buildingId) DO NOTHING`
+          );
 
-          for (const row of rows) {
-            const location = parsePolygon(row.location);
-            const units = parseArray(row.units);
+          const unitStmt = db.prepare(
+            `INSERT INTO buildingUnits (buildingId, unitId)
+             VALUES (?, ?)
+             ON CONFLICT DO NOTHING`
+          );
 
-            await client.query(
-              `INSERT INTO buildings (building_id, location, building_type, max_occupancy, units)
-               VALUES ($1, ${location}, $2, $3, ${units})
-               ON CONFLICT (building_id) DO NOTHING`,
-              [
+          const insertMany = db.transaction((rows: BuildingRow[]) => {
+            for (const row of rows) {
+              // Insert building with geometry
+              buildingStmt.run(
                 parseInt(row.buildingId),
                 row.buildingType || null,
-                row.maxOccupancy ? parseInt(row.maxOccupancy) : null
-              ]
-            );
-            imported++;
-          }
+                row.maxOccupancy ? parseInt(row.maxOccupancy) : null,
+                row.location || null
+              );
 
-          client.release();
-          console.log(`Imported ${imported} buildings`);
+              // Parse and insert building units
+              if (row.units) {
+                try {
+                  // Parse array like "[481,498,534,652,818]"
+                  const unitsArray = JSON.parse(row.units);
+                  for (const unitId of unitsArray) {
+                    unitStmt.run(parseInt(row.buildingId), parseInt(unitId));
+                  }
+                } catch (e) {
+                  console.warn(`Failed to parse units for building ${row.buildingId}:`, row.units);
+                }
+              }
+
+              imported++;
+            }
+          });
+
+          insertMany(rows);
+          console.log(`Imported ${imported} buildings with units${TEST_MODE ? ' (TEST MODE)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
@@ -280,52 +385,92 @@ export async function importGenericAttributes(
 ): Promise<number> {
   return new Promise((resolve, reject) => {
     const rows: any[] = [];
+    let rowCount = 0;
 
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on('data', (row) => rows.push(row))
+      .on('data', (row) => {
+        if (!TEST_MODE || rowCount < TEST_LIMIT) {
+          rows.push(row);
+          rowCount++;
+        }
+      })
       .on('end', async () => {
-        const client = await pool.connect();
         try {
           let imported = 0;
 
           // Auto-detect columns from first row
           if (rows.length === 0) {
-            client.release();
             resolve(0);
             return;
           }
 
           const columns = Object.keys(rows[0]);
-          const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
 
-          for (const row of rows) {
-            const values = columns.map(col => {
-              const value = row[col];
-              if (value === '' || value === null) return null;
-              // Try to parse as number if possible
-              const num = parseFloat(value);
-              if (!isNaN(num) && value.trim() !== '') return num;
-              // Handle booleans
-              if (value.toUpperCase() === 'TRUE') return true;
-              if (value.toUpperCase() === 'FALSE') return false;
-              return value;
-            });
+          // Determine if this table has location column (POINT geometry)
+          const hasLocation = columns.includes('location');
+          const isJobsTable = tableName === 'jobs';
 
-            await client.query(
-              `INSERT INTO ${tableName} (${columns.join(', ')})
-               VALUES (${placeholders})
-               ON CONFLICT DO NOTHING`,
-              values
-            );
-            imported++;
+          // Build SQL statement
+          let sql: string;
+          if (hasLocation) {
+            // Replace location with GeomFromText for spatial data
+            const sqlColumns = columns.map(col => col === 'location' ? 'location' : col);
+            const placeholders = columns.map(col =>
+              col === 'location' ? 'GeomFromText(?, 4326)' : '?'
+            ).join(', ');
+            sql = `INSERT INTO ${tableName} (${sqlColumns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
+          } else if (isJobsTable) {
+            // For jobs, add boolean columns for days
+            const allColumns = [...columns, 'worksMonday', 'worksTuesday', 'worksWednesday', 'worksThursday', 'worksFriday', 'worksSaturday', 'worksSunday'];
+            const placeholders = allColumns.map(() => '?').join(', ');
+            sql = `INSERT INTO ${tableName} (${allColumns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
+          } else {
+            const placeholders = columns.map(() => '?').join(', ');
+            sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
           }
 
-          client.release();
-          console.log(`Imported ${imported} records into ${tableName}`);
+          const stmt = db.prepare(sql);
+
+          const insertMany = db.transaction((rows: any[]) => {
+            for (const row of rows) {
+              const values = columns.map(col => {
+                const value = row[col];
+                if (value === '' || value === null) return null;
+                // Don't parse location as number - keep as WKT string
+                if (col === 'location') return value;
+                // Try to parse as number if possible
+                const num = parseFloat(value);
+                if (!isNaN(num) && value.trim() !== '') return num;
+                // Handle booleans
+                if (value.toUpperCase() === 'TRUE') return 1;
+                if (value.toUpperCase() === 'FALSE') return 0;
+                return value;
+              });
+
+              // For jobs table, parse daysToWork and add boolean values
+              if (isJobsTable) {
+                const daysToWork = row.daysToWork || '';
+                values.push(
+                  daysToWork.includes('Monday') ? 1 : 0,
+                  daysToWork.includes('Tuesday') ? 1 : 0,
+                  daysToWork.includes('Wednesday') ? 1 : 0,
+                  daysToWork.includes('Thursday') ? 1 : 0,
+                  daysToWork.includes('Friday') ? 1 : 0,
+                  daysToWork.includes('Saturday') ? 1 : 0,
+                  daysToWork.includes('Sunday') ? 1 : 0
+                );
+              }
+
+              stmt.run(...values);
+              imported++;
+            }
+          });
+
+          insertMany(rows);
+          console.log(`Imported ${imported} records into ${tableName}${TEST_MODE ? ' (TEST MODE)' : ''}`);
           resolve(imported);
         } catch (error) {
-          client.release();
           reject(error);
         }
       })
