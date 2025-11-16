@@ -15,7 +15,6 @@ This project consists of a PostgreSQL database, Node.js backend API, and React f
 │   │   ├── scripts/         # Database setup scripts
 │   │   ├── utils/           # CSV parser utilities
 │   │   └── server.ts        # Main server file
-├── data/                   # CSV datasets (now in project root, not copied into backend image)
 │   ├── Dockerfile
 │   └── package.json
 └── vast-frontend/            # React + Vite frontend
@@ -28,63 +27,20 @@ This project consists of a PostgreSQL database, Node.js backend API, and React f
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- Node.js 20+ (for local development)
-- PostgreSQL 15+ with PostGIS (for local development without Docker)
-- **IMPORTANT**: You need to add the VAST Challenge dataset files to the `/data/Dataset` folder (not included in this repository due to size)
 
-### Required Data Files
-
-You need to add the VAST Challenge dataset files to the `/data/Datasets/` folder:
-
-```
-data/
-└── Datasets/          # ← ADD THIS FOLDER with CSV files
-    ├── Attributes/
-    │   ├── Participants.csv
-    │   ├── Buildings.csv
-    │   ├── Apartments.csv
-    │   ├── Employers.csv
-    │   ├── Jobs.csv
-    │   ├── Pubs.csv
-    │   ├── Restaurants.csv
-    │   └── Schools.csv
-    ├── Activity Logs/
-    │   ├── ParticipantStatusLogs1.csv
-    │   ├── ParticipantStatusLogs2.csv
-    │   └── ... (72 files total)
-    └── Journals/
-        ├── CheckinJournal.csv
-        ├── FinancialJournal.csv
-        ├── SocialNetwork.csv
-        └── TravelJournal.csv
-```
-
-The `docker-entrypoint-initdb.d/` folder with SQL scripts is already included in the repository.
+For local development:
+- Node.js 20+
+- PostgreSQL 15+ with PostGIS
 
 ## Quick Start with Docker
 
-1. **Ensure data files are in place** (see Prerequisites section above)
+1. **Import data:**
+  See more info in the next sections
 
-2. **Start all services with monitoring:**
-   ```bash
-   ./start-with-monitoring.sh
-   ```
-
-   This will:
-   - Automatically create `.env` file from `.env.example` if it doesn't exist
-   - Start PostgreSQL with PostGIS extension
-   - Build and start the backend API
-   - Automatically initialize the database schema
-   - Import CSV data using PostgreSQL's COPY command
-   - Build and start the frontend with Nginx
-   - Display real-time progress during initialization
-
-   **⚠️ IMPORTANT - First Run:**
-   - The **first initialization will take 10-15 minutes** to complete
-   - The database volume will use **significant disk space** (several GB)
-   - The script will show progress updates as data is migrated from CSV to database
-   - **Do not interrupt the process** - let it complete fully
-   - Subsequent startups will be much faster (database is persisted in a Docker volume)
+2. **Start services:**
+```bash
+docker compose up --build -d
+```
 
 3. **Access the application:**
    - **Frontend:** http://localhost
@@ -94,7 +50,7 @@ The `docker-entrypoint-initdb.d/` folder with SQL scripts is already included in
 
 4. **Test the API with Bruno:**
 
-   A Bruno API collection is included in the `/brun-endpointso/` folder with example requests for all endpoints. Import this collection into [Bruno](https://www.usebruno.com/) to quickly test the API.
+   A Bruno API collection is included in the `/bruno-endpoints/` folder with example requests for all endpoints. Import this collection into [Bruno](https://www.usebruno.com/) to quickly test the API.
 
 5. **Stop all services:**
    ```bash
@@ -103,27 +59,39 @@ The `docker-entrypoint-initdb.d/` folder with SQL scripts is already included in
 
 6. **Complete cleanup (including database):**
    ```bash
-   ./cleanup.sh
+   docker-compose down -v
    ```
-   **⚠️ WARNING:** This will delete all Docker volumes, including the database. The next startup will require a **full re-import of all data (10-15 minutes)** and will consume disk space again.
+   **⚠️ WARNING:** This will delete all Docker volumes, including the database. The next startup will require a **full re-import of all data** and will consume disk space again.
 
-## Technologies Used
+## Database Export/Import (RECOMMENDED)
 
-### Backend
-- **Node.js** 20 with **TypeScript**
-- **Express.js** - REST API framework
-- **PostgreSQL** 15 with **PostGIS** - Spatial database
-- **pg** - PostgreSQL client
-- **csv-parser** - CSV data import
+**Skip the 10-15 minute CSV import!** Use database dumps to share and restore the complete database instantly.
 
-### Frontend
-- **React** 19
-- **Vite** - Build tool and dev server
-- **TypeScript**
+### For Team Members: Quick Setup
 
-### DevOps
-- **Docker** & **Docker Compose**
-- **Nginx** - Frontend serving and API reverse proxy
+A DB dump is present in the Releases of the git project.
+If someone shares a database dump file with you:
+
+```bash
+# 1. Place the dump file in db-exports/ folder
+# 2. Run the restore script
+./restore-database.sh <filename>
+
+# 3. Start all services
+docker-compose up -d
+```
+
+**That's it!** Your database is ready in minutes instead of CSV importing.
+
+### Export Your Database
+
+Create a dump file to share with others:
+
+```bash
+./export-database.sh
+```
+
+This creates a compressed SQL dump in `db-exports/` folder. Share this file with your team.
 
 ## Architecture
 
@@ -146,7 +114,7 @@ The `docker-entrypoint-initdb.d/` folder with SQL scripts is already included in
 ┌─────────────────────────────────────────┐
 │  Backend (Node.js) Container            │
 │  - Express REST API                     │
-│  - Auto-initializes DB on first run    │
+│  - Auto-initializes DB on first run     │
 │  Port 3000 (internal only)              │
 └────────────┬────────────────────────────┘
              │ Internal Network
@@ -157,45 +125,3 @@ The `docker-entrypoint-initdb.d/` folder with SQL scripts is already included in
 │  Port 5432 (internal only)              │
 └─────────────────────────────────────────┘
 ```
-
-## Troubleshooting
-
-### Database connection issues
-- Ensure PostgreSQL is running
-- Check the `.env` file has correct credentials
-- Verify the database `vast_challenge` exists
-- Ensure PostGIS extension is installed: `CREATE EXTENSION postgis;`
-
-### Docker issues
-- **Clear Docker cache:**
-  ```bash
-  docker-compose down -v
-  docker system prune -a
-  ```
-- **Check logs:**
-  ```bash
-  docker-compose logs -f
-  ```
-- **Verify containers are running:**
-  ```bash
-  docker-compose ps
-  ```
-
-### Data import issues
-- Database schema is automatically initialized on first run
-- Check CSV files exist in `data/Datasets/`
-
-### Port conflicts
-- If port 80 is already in use, edit `docker-compose.yml`:
-  ```yaml
-  ports:
-    - "8080:80"  # Change to your preferred port
-  ```
-
-## Security Notes
-
-- The database is isolated in the internal Docker network
-- Only the frontend and backend are exposed to the host machine (for testing)
-- All API requests are proxied through Nginx
-- Environment variables should be configured properly in production
-- CORS is enabled on the backend for development purposes
