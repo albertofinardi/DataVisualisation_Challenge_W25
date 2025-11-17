@@ -57,6 +57,14 @@ export function Heatmap({
     const cellPixelWidth = xScale(cellSize) - xScale(0);
     const cellPixelHeight = yScale(0) - yScale(cellSize);
 
+    // Add SVG filter for Gaussian blur to create smooth interpolation
+    const defs = svg.append('defs');
+    defs.append('filter')
+      .attr('id', 'heatmap-blur')
+      .append('feGaussianBlur')
+      .attr('in', 'SourceGraphic')
+      .attr('stdDeviation', Math.max(cellPixelWidth, cellPixelHeight) * 0.6);
+
     const g = svg.append('g');
 
     // Add background map image
@@ -69,25 +77,38 @@ export function Heatmap({
       .attr('opacity', MAP_CONFIG.image.opacity)
       .attr('preserveAspectRatio', 'none');
 
-    // Draw heatmap cells
-    g.selectAll('rect')
+    // Create a group for the heatmap with blur filter
+    const heatmapGroup = g.append('g')
+      .attr('filter', 'url(#heatmap-blur)');
+
+    // Draw heatmap circles (will be blurred for smooth interpolation)
+    heatmapGroup.selectAll('circle')
+      .data(data.filter((d) => parseInt(d.count) >= MAP_CONFIG.heatmap.minCount))
+      .enter()
+      .append('circle')
+      .attr('cx', (d) => xScale(d.grid_x) + cellPixelWidth / 2)
+      .attr('cy', (d) => yScale(d.grid_y + cellSize) + cellPixelHeight / 2)
+      .attr('r', Math.max(cellPixelWidth, cellPixelHeight) * 0.8)
+      .attr('fill', (d) => colorScale(parseInt(d.count)))
+      .attr('opacity', MAP_CONFIG.heatmap.opacity);
+
+    // Add invisible rectangles for interaction (on top, not blurred)
+    g.selectAll('rect.interaction')
       .data(data.filter((d) => parseInt(d.count) >= MAP_CONFIG.heatmap.minCount))
       .enter()
       .append('rect')
+      .attr('class', 'interaction')
       .attr('x', (d) => xScale(d.grid_x))
       .attr('y', (d) => yScale(d.grid_y + cellSize))
       .attr('width', cellPixelWidth)
       .attr('height', cellPixelHeight)
-      .attr('fill', (d) => colorScale(parseInt(d.count)))
-      .attr('opacity', MAP_CONFIG.heatmap.opacity)
+      .attr('fill', 'transparent')
       .attr('stroke', 'none')
-      .attr('rx', 2)
       .style('cursor', 'pointer')
       .on('mouseenter', function (event, d) {
         d3.select(this)
           .attr('stroke', hoverColor)
-          .attr('stroke-width', 2)
-          .attr('opacity', 0.95);
+          .attr('stroke-width', 2);
 
         const [mouseX, mouseY] = d3.pointer(event, svg.node());
         setTooltip({
@@ -97,7 +118,7 @@ export function Heatmap({
         });
       })
       .on('mouseleave', function () {
-        d3.select(this).attr('stroke', 'none').attr('opacity', MAP_CONFIG.heatmap.opacity);
+        d3.select(this).attr('stroke', 'none');
         setTooltip(null);
       })
       .on('click', (_event, d) => {
@@ -125,8 +146,7 @@ export function Heatmap({
     const legendX = width - padding.right - legendWidth - 20;
     const legendY = padding.top + 20;
 
-    // Create gradient for legend
-    const defs = svg.append('defs');
+    // Create gradient for legend (reuse existing defs)
     const gradient = defs.append('linearGradient')
       .attr('id', 'legend-gradient')
       .attr('x1', '0%')
