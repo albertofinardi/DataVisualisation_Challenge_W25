@@ -1,0 +1,31 @@
+meta {
+  name: Heatmap - Restaurants Only
+  type: http
+  seq: 12
+}
+
+get {
+  url: http://localhost:3000/api/data/heatmap/checkins?venue_type=Restaurant
+  body: none
+  auth: inherit
+}
+
+params:query {
+  venue_type: Restaurant
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  # Heatmap - Restaurants Only
+
+  Get heatmap data filtered to show only restaurant checkins.
+
+  ## Query Parameters
+  - venue_type: "Restaurant" (filters results to restaurants only)
+
+  ## Response Format
+  Same as "Heatmap - All Checkins" but only includes venues where venue_type = "Restaurant"
+}

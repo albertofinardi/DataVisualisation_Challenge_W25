@@ -1,0 +1,57 @@
+meta {
+  name: Location Details
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:3000/api/heatmap/locations/details?grid_x=-200&grid_y=4000&time_bucket=2022-03-21T05:00:00.000Z&cell_size=100&time_bucket_minutes=60
+  body: none
+  auth: inherit
+}
+
+params:query {
+  grid_x: -200
+  grid_y: 4000
+  time_bucket: 2022-03-21T05:00:00.000Z
+  cell_size: 100
+  time_bucket_minutes: 60
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get detailed participant information for a specific grid cell and time bucket
+   *
+   * @route GET /api/heatmap/locations/details
+   *
+   * @queryparam {number} grid_x - The grid cell X coordinate (required)
+   * @queryparam {number} grid_y - The grid cell Y coordinate (required)
+   * @queryparam {string} [time_bucket] - The time bucket timestamp (ISO 8601, required for temporal queries)
+   * @queryparam {number} [cell_size=100] - Grid cell size in map units (must match the heatmap query)
+   * @queryparam {number} [time_bucket_minutes=60] - Time bucket size in minutes (must match the heatmap query)
+   *
+   * @returns {Object} Detailed information about participants in the grid cell
+   *
+   * @example
+   * // Response:
+   * {
+   *   "grid_x": -200,
+   *   "grid_y": 4000,
+   *   "time_bucket": "2022-03-01T05:00:00.000Z",
+   *   "participant_count": 5,
+   *   "participants": [12, 45, 78, 123, 456]
+   * }
+   *
+   * @description
+   * Returns the list of unique participant IDs in a specific grid cell at a specific time.
+   * Useful for showing details when clicking on a heatmap cell.
+   *
+   * IMPORTANT: Make sure cell_size and time_bucket_minutes match the values used in the
+   * /locations endpoint to get accurate results.
+   */
+}

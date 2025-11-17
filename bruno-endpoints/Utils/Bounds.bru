@@ -1,0 +1,53 @@
+meta {
+  name: Bounds
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/api/utils/bounds
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get bounding box coordinates for the map
+   *
+   * @route GET /api/utils/bounds
+   *
+   * @queryparam {string} [start] - Optional start timestamp filter (ISO 8601)
+   * @queryparam {string} [end] - Optional end timestamp filter (ISO 8601)
+   *
+   * @returns {Object} Bounding box with min/max coordinates
+   *
+   * @example
+   * // GET /api/utils/bounds
+   * {
+   *   "min_longitude": -500.5,
+   *   "max_longitude": 800.3,
+   *   "min_latitude": 3500.2,
+   *   "max_latitude": 5200.8,
+   *   "center_longitude": 149.9,
+   *   "center_latitude": 4350.5,
+   *   "width": 1300.8,
+   *   "height": 1700.6
+   * }
+   *
+   * @description
+   * Returns the bounding box of all participant location data.
+   *
+   * Use this to:
+   * - Set initial map view
+   * - Calculate appropriate zoom level
+   * - Understand the data extent
+   *
+   * The top-left corner is (min_longitude, max_latitude)
+   * The bottom-right corner is (max_longitude, min_latitude)
+   */
+}

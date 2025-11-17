@@ -1,0 +1,74 @@
+meta {
+  name: Checkins
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/api/heatmap/checkins
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get heatmap data for checkin activity by location
+   *
+   * @route GET /api/heatmap/checkins
+   *
+   * @queryparam {string} [start] - Optional start timestamp filter (ISO 8601 format, e.g., '2022-03-01' or '2022-03-01T00:00:00Z')
+   * @queryparam {string} [end] - Optional end timestamp filter (ISO 8601 format, e.g., '2022-03-31' or '2022-03-31T23:59:59Z')
+   * @queryparam {string} [venue_type] - Optional venue type filter. Valid values: 'Pub' or 'Restaurant'
+   *
+   * @returns {Array<Object>} Array of venue checkin heatmap data points, sorted by checkin count (descending)
+   *
+   * @example
+   * // Request: GET /api/heatmap/checkins
+   * // Response:
+   * [
+   *   {
+   *     "venue_id": 1344,
+   *     "venue_type": "Pub",
+   *     "checkin_count": "54174",
+   *     "longitude": -162.84407093388845,
+   *     "latitude": 3927.436359050686
+   *   },
+   *   {
+   *     "venue_id": 1342,
+   *     "venue_type": "Pub",
+   *     "checkin_count": "50400",
+   *     "longitude": -271.3042071873528,
+   *     "latitude": 4984.710389294818
+   *   }
+   * ]
+   *
+   * @example
+   * // Filter by date range: GET /api/heatmap/checkins?start=2022-03-01&end=2022-03-31
+   *
+   * @example
+   * // Filter by venue type: GET /api/heatmap/checkins?venue_type=Pub
+   *
+   * @example
+   * // Combined filters: GET /api/heatmap/checkins?start=2022-03-01&end=2022-03-31&venue_type=Restaurant
+   *
+   * @description
+   * This endpoint aggregates checkin data from the checkin_journal table and joins it with venue location data
+   * (pubs and restaurants). For each venue, it returns:
+   * - venue_id: The unique identifier of the venue (pub_id or restaurant_id)
+   * - venue_type: Type of venue ('Pub' or 'Restaurant')
+   * - checkin_count: Total number of checkins at this venue (as string)
+   * - longitude: X coordinate of the building centroid (PostGIS ST_X)
+   * - latitude: Y coordinate of the building centroid (PostGIS ST_Y)
+   *
+   * The query uses PostGIS spatial functions to extract coordinates from building polygons.
+   * Results are ordered by checkin count in descending order (most popular venues first).
+   *
+   * @note The checkin_count is returned as a string due to PostgreSQL's bigint type.
+   *       Convert to number in the frontend if needed: parseInt(checkin_count)
+   */
+}

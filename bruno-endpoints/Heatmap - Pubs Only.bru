@@ -1,0 +1,31 @@
+meta {
+  name: Heatmap - Pubs Only
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:3000/api/data/heatmap/checkins?venue_type=Pub
+  body: none
+  auth: inherit
+}
+
+params:query {
+  venue_type: Pub
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  # Heatmap - Pubs Only
+
+  Get heatmap data filtered to show only pub checkins.
+
+  ## Query Parameters
+  - venue_type: "Pub" (filters results to pubs only)
+
+  ## Response Format
+  Same as "Heatmap - All Checkins" but only includes venues where venue_type = "Pub"
+}

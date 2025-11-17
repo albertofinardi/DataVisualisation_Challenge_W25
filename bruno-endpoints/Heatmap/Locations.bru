@@ -1,0 +1,59 @@
+meta {
+  name: Locations
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3000/api/heatmap/locations?cell_size=100&time_bucket_minutes=60&include_temporal=true&start=2022-03-21T00:00:00Z&end=2022-03-24T23:59:59Z
+  body: none
+  auth: inherit
+}
+
+params:query {
+  cell_size: 100
+  time_bucket_minutes: 60
+  include_temporal: true
+  start: 2022-03-21T00:00:00Z
+  end: 2022-03-24T23:59:59Z
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get spatial-temporal heatmap data from participant location logs
+   *
+   * @route GET /api/heatmap/locations
+   *
+   * @queryparam {string} [start] - Optional start timestamp (ISO 8601, e.g., '2022-03-01T00:00:00Z')
+   * @queryparam {string} [end] - Optional end timestamp (ISO 8601, e.g., '2022-03-01T23:59:59Z')
+   * @queryparam {number} [cell_size=100] - Grid cell size in map units (default: 100)
+   * @queryparam {number} [time_bucket_minutes=60] - Time bucket size in minutes for temporal aggregation (default: 60)
+   * @queryparam {boolean} [include_temporal=true] - Include time buckets in response (default: true)
+   *
+   * @returns {Object} Object with time buckets as keys, each containing an array of location data
+   *
+   * @example
+   * // Temporal heatmap (default)
+   * {
+   *   "2022-03-01T05:00:00.000Z": [
+   *     {
+   *       "grid_x": -200,
+   *       "grid_y": 4000,
+   *       "count": "342",
+   *       "center_longitude": -175.5,
+   *       "center_latitude": 4025.0
+   *     }
+   *   ],
+   *   "2022-03-01T06:00:00.000Z": [...]
+   * }
+   *
+   * @description
+   * Returns unique participant counts per grid cell, grouped by time bucket.
+   * Perfect for animating crowd movement over time.
+   */
+}

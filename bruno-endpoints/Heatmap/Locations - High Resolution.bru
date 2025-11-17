@@ -1,0 +1,35 @@
+meta {
+  name: Locations - High Resolution
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/api/heatmap/locations?cell_size=50&time_bucket_minutes=30&include_temporal=true&start=2022-03-21T12:00:00Z&end=2022-03-21T18:00:00Z
+  body: none
+  auth: inherit
+}
+
+params:query {
+  cell_size: 50
+  time_bucket_minutes: 30
+  include_temporal: true
+  start: 2022-03-21T12:00:00Z
+  end: 2022-03-21T18:00:00Z
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * High resolution heatmap
+   *
+   * Uses smaller grid cells (50 units) and shorter time buckets (30 minutes)
+   * for more detailed analysis of crowd movement.
+   *
+   * Great for analyzing specific events or busy periods.
+   */
+}

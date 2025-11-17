@@ -1,0 +1,38 @@
+meta {
+  name: Heatmap - Date Range
+  type: http
+  seq: 13
+}
+
+get {
+  url: http://localhost:3000/api/data/heatmap/checkins?start=2022-03-01&end=2022-03-31
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-01
+  end: 2022-03-31
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  # Heatmap - Date Range Filter
+
+  Get heatmap data for checkins within a specific date range (March 2022 in this example).
+
+  ## Query Parameters
+  - start: "2022-03-01" (ISO 8601 format, inclusive)
+  - end: "2022-03-31" (ISO 8601 format, inclusive)
+
+  ## Date Format Options
+  - Simple date: "2022-03-01"
+  - With time: "2022-03-01T00:00:00Z"
+  - Partial dates work too: "2022-03-01T12:30:00"
+
+  ## Response Format
+  Same as "Heatmap - All Checkins" but only includes checkins within the date range
+}

@@ -1,0 +1,47 @@
+meta {
+  name: Heatmap - Combined Filters
+  type: http
+  seq: 14
+}
+
+get {
+  url: http://localhost:3000/api/data/heatmap/checkins?start=2022-03-01&end=2022-03-31&venue_type=Pub
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-01
+  end: 2022-03-31
+  venue_type: Pub
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  # Heatmap - Combined Filters
+
+  Example combining multiple filters: date range + venue type.
+
+  This shows pub checkins in March 2022.
+
+  ## Query Parameters
+  - start: "2022-03-01"
+  - end: "2022-03-31"
+  - venue_type: "Pub"
+
+  ## Filter Combinations
+  You can use any combination of:
+  - start only (all checkins from this date forward)
+  - end only (all checkins up to this date)
+  - venue_type only (filter by Pub or Restaurant)
+  - start + end (date range)
+  - start + venue_type
+  - end + venue_type
+  - All three (as shown in this example)
+
+  ## Response Format
+  Same as "Heatmap - All Checkins" but filtered by all active query parameters
+}

@@ -1,0 +1,41 @@
+meta {
+  name: Heatmap - All Checkins
+  type: http
+  seq: 10
+}
+
+get {
+  url: http://localhost:3000/api/data/heatmap/checkins
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  # Heatmap - All Checkins
+
+  Get heatmap data for all checkin activity across all venues (pubs and restaurants).
+
+  Returns an array of venue locations with checkin counts, sorted by popularity (descending).
+
+  ## Response Format
+  ```json
+  [
+    {
+      "venue_id": 1344,
+      "venue_type": "Pub",
+      "checkin_count": "54174",
+      "longitude": -162.84407093388845,
+      "latitude": 3927.436359050686
+    }
+  ]
+  ```
+
+  ## Notes
+  - checkin_count is a string (PostgreSQL bigint)
+  - Coordinates are from building centroids (PostGIS)
+  - Results sorted by checkin_count DESC
+}

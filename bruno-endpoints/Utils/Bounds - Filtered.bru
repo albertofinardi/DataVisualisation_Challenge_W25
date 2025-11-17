@@ -1,0 +1,30 @@
+meta {
+  name: Bounds - Filtered
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3000/api/utils/bounds?start=2022-03-21T00:00:00Z&end=2022-03-21T23:59:59Z
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-21T00:00:00Z
+  end: 2022-03-21T23:59:59Z
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get bounding box for a specific time period
+   *
+   * Useful for understanding how the data extent changes over time,
+   * or for setting appropriate zoom levels for specific time periods.
+   */
+}
