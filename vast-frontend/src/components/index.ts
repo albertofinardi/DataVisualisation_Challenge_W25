@@ -1,4 +1,4 @@
-export { Heatmap } from './Heatmap';
-export { HeatmapViewer } from './HeatmapViewer';
+export { Heatmap } from './Heatmap/Heatmap';
+export { HeatmapViewer } from './Heatmap/HeatmapViewer';
 export { LoadingSpinner } from './LoadingSpinner';
 export { SettingsPanel } from './SettingsPanel';

@@ -3,6 +3,7 @@ import { DesktopOnly } from './components/DesktopOnly';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Heatmap } from './pages/Heatmap';
+import { Streamgraph } from './pages/Streamgraph';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/heatmap" element={<Heatmap />} />
+            <Route path="/streamgraph" element={<Streamgraph />} />
           </Routes>
         </Layout>
       </Router>

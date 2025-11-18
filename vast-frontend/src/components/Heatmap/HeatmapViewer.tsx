@@ -9,8 +9,8 @@ import {
   Clock,
 } from "lucide-react";
 import { Heatmap } from "./Heatmap";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { SettingsPanel } from "./SettingsPanel";
+import { LoadingSpinner } from "../LoadingSpinner";
+import { SettingsPanel } from "../SettingsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
@@ -23,7 +23,7 @@ import { usePlayback } from "@/hooks/usePlayback";
 export function HeatmapViewer() {
   const [showDataConfig, setShowDataConfig] = useState(true);
   const [useConstantScale, setUseConstantScale] = useState(false);
-  const [cellSize, setCellSize] = useState(50);
+  const [cellSize, setCellSize] = useState(25);
   const [timeBucketMinutes, setTimeBucketMinutes] = useState(30);
   const [startDate, setStartDate] = useState("2022-03-21");
   const [startTime, setStartTime] = useState("00:00");
@@ -94,7 +94,7 @@ export function HeatmapViewer() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-8xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

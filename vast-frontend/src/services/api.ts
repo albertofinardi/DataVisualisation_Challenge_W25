@@ -4,6 +4,7 @@
 
 import { MAP_CONFIG } from '../config/map.config';
 import type { TemporalHeatmapData, StaticHeatmapData, LocationDetails, Bounds } from '../types/heatmap.types';
+import type { StreamgraphDataResponse } from '../types/streamgraph.types';
 
 const { baseUrl } = MAP_CONFIG.api;
 
@@ -96,6 +97,29 @@ export const api = {
     const response = await fetch(`${baseUrl}/utils/bounds${queryParams ? `?${queryParams}` : ''}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch bounds: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch streamgraph activity data (grouped by time)
+   */
+  async fetchStreamgraphActivities(params: {
+    start?: string;
+    end?: string;
+    time_bucket_minutes?: number;
+  }): Promise<StreamgraphDataResponse> {
+    const queryParams = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, String(value)])
+      )
+    );
+
+    const response = await fetch(`${baseUrl}/streamgraph/activities?${queryParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch streamgraph data: ${response.statusText}`);
     }
     return response.json();
   },
