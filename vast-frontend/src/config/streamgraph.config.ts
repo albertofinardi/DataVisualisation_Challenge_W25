@@ -2,15 +2,11 @@
  * Streamgraph configuration
  */
 
+import { ACTIVITY_CONFIG } from "./activities.config";
+
 export const STREAMGRAPH_CONFIG = {
   // Color scheme for activities
-  colors: {
-    AtHome: '#4e79a7',        // Blue
-    AtWork: '#f28e2c',        // Orange
-    Transport: '#e15759',     // Red
-    AtRestaurant: '#76b7b2',  // Teal
-    AtRecreation: '#59a14f',  // Green
-  },
+  colors: ACTIVITY_CONFIG.colors,
 
   // Visualization settings
   visual: {

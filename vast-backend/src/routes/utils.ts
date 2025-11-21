@@ -122,4 +122,41 @@ router.get('/bounds', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Get all unique participant IDs
+ *
+ * @route GET /api/utils/participants
+ *
+ * @returns {Object} Array of all unique participant IDs
+ *
+ * @example
+ * // GET /api/utils/participants
+ * {
+ *   "participant_ids": [1, 2, 3, 4, ...]
+ * }
+ *
+ * @description
+ * Returns all unique participant IDs from the participants table.
+ * This list is static and can be hardcoded in the frontend to avoid unnecessary queries.
+ */
+router.get('/participants', async (_req: Request, res: Response) => {
+  try {
+    const query = `
+      SELECT participant_id
+      FROM participants
+      ORDER BY participant_id ASC
+    `;
+
+    const result = await pool.query(query);
+
+    const participantIds = result.rows.map((row: any) => parseInt(row.participant_id));
+
+    return res.json({
+      participant_ids: participantIds
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export { router };

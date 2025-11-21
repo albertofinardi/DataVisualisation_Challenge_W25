@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, MapPin, Activity } from 'lucide-react';
+import { Home, MapPin, Activity, Calendar } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -44,6 +44,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               <Activity className="h-4 w-4" />
               Streamgraph
+            </Link>
+            <Link
+              to="/activity-calendar"
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActive('/activity-calendar')
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+              }`}
+            >
+              <Calendar className="h-4 w-4" />
+              Activity Calendar
             </Link>
           </nav>
         </div>

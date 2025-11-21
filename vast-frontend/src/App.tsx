@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Heatmap } from './pages/Heatmap';
 import { Streamgraph } from './pages/Streamgraph';
+import { ActivityCalendar } from './pages/ActivityCalendar';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/heatmap" element={<Heatmap />} />
             <Route path="/streamgraph" element={<Streamgraph />} />
+            <Route path="/activity-calendar" element={<ActivityCalendar />} />
           </Routes>
         </Layout>
       </Router>

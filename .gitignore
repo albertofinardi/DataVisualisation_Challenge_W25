@@ -34,3 +34,6 @@ Thumbs.db
 logs/
 db-exports/
 *.sql.gz
+
+
+vast_db_dump_split_*

@@ -1,0 +1,65 @@
+meta {
+  name: Timeline - Single Participant
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/api/activity-calendar/timeline?participant_id=1&granularity_minutes=60&start=2022-03-01T00:00:00Z&end=2022-03-07T23:59:59Z
+  body: none
+  auth: inherit
+}
+
+params:query {
+  participant_id: 1
+  granularity_minutes: 60
+  start: 2022-03-01T00:00:00Z
+  end: 2022-03-07T23:59:59Z
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  /**
+   * Get dominant activity timeline for a single participant
+   *
+   * @route GET /api/activity-calendar/timeline
+   *
+   * @queryparam {number} participant_id - Participant ID (required for single participant view)
+   * @queryparam {string} [start] - Optional start timestamp (ISO 8601, e.g., '2022-03-01T00:00:00Z')
+   * @queryparam {string} [end] - Optional end timestamp (ISO 8601, e.g., '2022-03-31T23:59:59Z')
+   * @queryparam {number} [granularity_minutes=60] - Time granularity in minutes (15, 30, 60, 120, 240)
+   *
+   * @returns {Object} Object with date as first key, time bucket as second key, participant ID as third key
+   *
+   * @example
+   * {
+   *   "data": {
+   *     "2022-03-01": {
+   *       "0": {
+   *         "1": {
+   *           "activity": "Sleeping",
+   *           "count": 45
+   *         }
+   *       },
+   *       "1": {
+   *         "1": {
+   *           "activity": "Sleeping",
+   *           "count": 52
+   *         }
+   *       }
+   *     },
+   *     "2022-03-02": {...}
+   *   }
+   * }
+   *
+   * @description
+   * Returns the dominant activity for each time bucket for a specific participant.
+   * Time buckets are calculated as: FLOOR(EXTRACT(HOUR FROM timestamp) * 60 / granularity_minutes)
+   * For 60-minute granularity, bucket 0 = 00:00-01:00, bucket 1 = 01:00-02:00, etc.
+   * For 30-minute granularity, bucket 0 = 00:00-00:30, bucket 1 = 00:30-01:00, etc.
+   */
+}

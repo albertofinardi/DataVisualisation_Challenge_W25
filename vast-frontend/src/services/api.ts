@@ -5,6 +5,7 @@
 import { MAP_CONFIG } from '../config/map.config';
 import type { TemporalHeatmapData, StaticHeatmapData, LocationDetails, Bounds } from '../types/heatmap.types';
 import type { StreamgraphDataResponse } from '../types/streamgraph.types';
+import type { ActivityTimelineDataResponse, ParticipantTimelineDataResponse } from '../types/activity-calendar.types';
 
 const { baseUrl } = MAP_CONFIG.api;
 
@@ -120,6 +121,51 @@ export const api = {
     const response = await fetch(`${baseUrl}/streamgraph/activities?${queryParams}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch streamgraph data: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch activity timeline calendar data (aggregated dominant activity per hour per day)
+   */
+  async fetchActivityTimeline(params: {
+    start?: string;
+    end?: string;
+  }): Promise<ActivityTimelineDataResponse> {
+    const queryParams = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, String(value)])
+      )
+    );
+
+    const response = await fetch(`${baseUrl}/activity-calendar/timeline-aggregated?${queryParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch activity timeline data: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch activity timeline calendar data for a single participant
+   */
+  async fetchParticipantTimeline(params: {
+    participant_id: number;
+    start?: string;
+    end?: string;
+  }): Promise<ParticipantTimelineDataResponse> {
+    const queryParams = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, String(value)])
+      )
+    );
+
+    const response = await fetch(`${baseUrl}/activity-calendar/timeline?${queryParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch participant timeline data: ${response.statusText}`);
     }
     return response.json();
   },
