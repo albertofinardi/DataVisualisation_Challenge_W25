@@ -1,4 +1,7 @@
--- Database schema for VAST Challenge data
+-- Enable PostGIS extension first
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Database schema for VAST Challenge data (matches data/init-scripts/01_schema.sql)
 
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS participant_status_logs CASCADE;
@@ -131,14 +134,19 @@ CREATE TABLE financial_journal (
     FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
 );
 
--- Travel Journal table
+-- Travel Journal table (stores location IDs, not GEOMETRY)
 CREATE TABLE travel_journal (
     id SERIAL PRIMARY KEY,
     participant_id INTEGER NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    start_location GEOMETRY(POINT),
-    end_location GEOMETRY(POINT),
-    travel_type VARCHAR(50),
+    travel_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    travel_start_location_id INTEGER,
+    travel_end_time TIMESTAMP WITH TIME ZONE,
+    travel_end_location_id INTEGER,
+    purpose VARCHAR(100),
+    check_in_time TIMESTAMP WITH TIME ZONE,
+    check_out_time TIMESTAMP WITH TIME ZONE,
+    starting_balance DECIMAL(10, 2),
+    ending_balance DECIMAL(10, 2),
     FOREIGN KEY (participant_id) REFERENCES participants(participant_id)
 );
 
@@ -154,9 +162,12 @@ CREATE TABLE social_network (
 -- Create indexes for better query performance
 CREATE INDEX idx_participant_status_logs_participant_id ON participant_status_logs(participant_id);
 CREATE INDEX idx_participant_status_logs_timestamp ON participant_status_logs(timestamp);
+CREATE INDEX idx_participant_status_logs_location ON participant_status_logs USING GIST(current_location);
 CREATE INDEX idx_checkin_journal_participant_id ON checkin_journal(participant_id);
 CREATE INDEX idx_checkin_journal_timestamp ON checkin_journal(timestamp);
 CREATE INDEX idx_financial_journal_participant_id ON financial_journal(participant_id);
 CREATE INDEX idx_financial_journal_timestamp ON financial_journal(timestamp);
 CREATE INDEX idx_travel_journal_participant_id ON travel_journal(participant_id);
-CREATE INDEX idx_travel_journal_timestamp ON travel_journal(timestamp);
+CREATE INDEX idx_travel_journal_start_time ON travel_journal(travel_start_time);
+CREATE INDEX idx_travel_journal_end_time ON travel_journal(travel_end_time);
+CREATE INDEX idx_buildings_location ON buildings USING GIST(location);

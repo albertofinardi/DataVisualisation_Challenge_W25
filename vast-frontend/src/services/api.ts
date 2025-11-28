@@ -2,12 +2,13 @@
  * API service for fetching heatmap data
  */
 
-import { MAP_CONFIG } from '../config/map.config';
+import { API_CONFIG } from '@/config/api.config';
 import type { TemporalHeatmapData, StaticHeatmapData, LocationDetails, Bounds } from '../types/heatmap.types';
 import type { StreamgraphDataResponse } from '../types/streamgraph.types';
 import type { ActivityTimelineDataResponse, ParticipantTimelineDataResponse } from '../types/activity-calendar.types';
+import type { FlowDiagramData } from '../types/flow.types';
 
-const { baseUrl } = MAP_CONFIG.api;
+const { baseUrl } = API_CONFIG;
 
 export interface HeatmapParams {
   start?: string;
@@ -166,6 +167,30 @@ export const api = {
     const response = await fetch(`${baseUrl}/activity-calendar/timeline?${queryParams}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch participant timeline data: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch origin-destination flow data
+   */
+  async fetchFlowData(params: {
+    start?: string;
+    end?: string;
+    cell_size?: number;
+    min_trip_count?: number;
+  }): Promise<FlowDiagramData> {
+    const queryParams = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, String(value)])
+      )
+    );
+
+    const response = await fetch(`${baseUrl}/flow/od-flows?${queryParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch flow data: ${response.statusText}`);
     }
     return response.json();
   },

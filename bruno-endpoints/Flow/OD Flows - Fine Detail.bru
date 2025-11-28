@@ -1,0 +1,44 @@
+meta {
+  name: OD Flows - Fine Detail
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/api/flow/od-flows?start=2022-03-21T07:00:00Z&end=2022-03-21T09:00:00Z&cell_size=25&min_trip_count=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-21T07:00:00Z
+  end: 2022-03-21T09:00:00Z
+  cell_size: 25
+  min_trip_count: 1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 30000
+}
+
+docs {
+  # Origin-Destination Flow - Fine Detail (Morning Rush)
+
+  This endpoint returns highly detailed travel flows with small grid cells.
+
+  ## Parameters:
+  - **start**: Morning rush start (7 AM)
+  - **end**: Morning rush end (9 AM)
+  - **cell_size**: 25 units (smallest - maximum detail)
+  - **min_trip_count**: 1 (all trips, even single occurrences)
+
+  ## Warning:
+  ⚠️ This may return a large dataset! Use short time windows.
+
+  ## Use Cases:
+  - Detailed analysis of specific time periods
+  - Identify exact bottleneck locations
+  - Micro-level traffic pattern analysis
+  - Morning commute patterns
+}

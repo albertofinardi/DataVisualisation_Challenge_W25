@@ -5,6 +5,7 @@ import { Home } from './pages/Home';
 import { Heatmap } from './pages/Heatmap';
 import { Streamgraph } from './pages/Streamgraph';
 import { ActivityCalendar } from './pages/ActivityCalendar';
+import { FlowDiagram } from './pages/FlowDiagram';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/heatmap" element={<Heatmap />} />
             <Route path="/streamgraph" element={<Streamgraph />} />
             <Route path="/activity-calendar" element={<ActivityCalendar />} />
+            <Route path="/flow-diagram" element={<FlowDiagram />} />
           </Routes>
         </Layout>
       </Router>

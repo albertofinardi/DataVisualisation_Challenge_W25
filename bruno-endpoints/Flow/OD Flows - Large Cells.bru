@@ -1,0 +1,41 @@
+meta {
+  name: OD Flows - Large Cells
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:3000/api/flow/od-flows?start=2022-03-21T00:00:00Z&end=2022-03-28T00:00:00Z&cell_size=100&min_trip_count=50
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-21T00:00:00Z
+  end: 2022-03-28T00:00:00Z
+  cell_size: 100
+  min_trip_count: 50
+}
+
+settings {
+  encodeUrl: true
+  timeout: 30000
+}
+
+docs {
+  # Origin-Destination Flow - Weekly Overview (Large Cells)
+
+  This endpoint returns weekly travel flows with larger grid cells for a high-level overview.
+
+  ## Parameters:
+  - **start**: Week start (2022-03-21)
+  - **end**: Week end (2022-03-28)
+  - **cell_size**: 100 units (larger cells = broader overview, fewer flows)
+  - **min_trip_count**: 50 (only major traffic corridors)
+
+  ## Use Cases:
+  - Get high-level overview of city-wide travel patterns
+  - Identify major traffic arteries
+  - Reduce data volume for faster analysis
+  - Weekly pattern analysis
+}

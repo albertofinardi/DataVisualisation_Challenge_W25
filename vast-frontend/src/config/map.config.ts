@@ -62,9 +62,4 @@ export const MAP_CONFIG = {
   image: {
     opacity: 0.5,
   },
-
-  // API settings
-  api: {
-    baseUrl: 'http://localhost:3000/api',
-  },
 } as const;

@@ -1,0 +1,41 @@
+meta {
+  name: OD Flows - Weekend
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/api/flow/od-flows?start=2022-03-26T00:00:00Z&end=2022-03-28T00:00:00Z&cell_size=50&min_trip_count=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-26T00:00:00Z
+  end: 2022-03-28T00:00:00Z
+  cell_size: 50
+  min_trip_count: 10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 30000
+}
+
+docs {
+  # Origin-Destination Flow - Weekend Analysis
+
+  This endpoint returns travel flows for the weekend (Saturday & Sunday).
+
+  ## Parameters:
+  - **start**: Saturday start (2022-03-26)
+  - **end**: Monday start (2022-03-28)
+  - **cell_size**: 50 units
+  - **min_trip_count**: 10
+
+  ## Use Cases:
+  - Compare weekend vs weekday travel patterns
+  - Identify recreational travel patterns
+  - Analyze leisure activity flows
+  - Weekend traffic management
+}

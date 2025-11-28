@@ -1,0 +1,47 @@
+meta {
+  name: OD Flows - Rush Hour
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/api/flow/od-flows?start=2022-03-21T07:00:00Z&end=2022-03-21T19:00:00Z&cell_size=50&min_trip_count=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2022-03-21T07:00:00Z
+  end: 2022-03-21T19:00:00Z
+  cell_size: 50
+  min_trip_count: 10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 30000
+}
+
+docs {
+  # Origin-Destination Flow - Rush Hour Analysis
+
+  This endpoint returns travel flows between different areas of the city during rush hours (7 AM - 7 PM).
+
+  ## Parameters:
+  - **start**: Start timestamp (ISO 8601 format)
+  - **end**: End timestamp (ISO 8601 format)
+  - **cell_size**: Grid cell size for spatial aggregation (default: 50 units)
+  - **min_trip_count**: Minimum number of trips to include a flow (default: 10)
+
+  ## Response:
+  Returns flows between grid cells with:
+  - Origin and destination grid coordinates
+  - Trip count
+  - Average duration in minutes
+  - Center coordinates for visualization
+
+  ## Use Cases:
+  - Identify traffic bottlenecks during peak hours
+  - Analyze commuting patterns
+  - Find high-traffic corridors
+}
