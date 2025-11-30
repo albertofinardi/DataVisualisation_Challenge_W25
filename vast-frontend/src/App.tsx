@@ -6,6 +6,7 @@ import { Heatmap } from './pages/Heatmap';
 import { Streamgraph } from './pages/Streamgraph';
 import { ActivityCalendar } from './pages/ActivityCalendar';
 import { ParticipantComparison } from './pages/ParticipantComparison';
+import { BuildingPolygons } from './pages/BuildingPolygons';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/streamgraph" element={<Streamgraph />} />
             <Route path="/activity-calendar" element={<ActivityCalendar />} />
             <Route path="/participant-comparison" element={<ParticipantComparison />} />
+            <Route path="/building-polygons" element={<BuildingPolygons />} />
           </Routes>
         </Layout>
       </Router>
