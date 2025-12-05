@@ -20,14 +20,16 @@ export interface UsePlaybackReturn {
  *
  * @param totalFrames - Total number of frames to play
  * @param baseInterval - Base interval in milliseconds (default 1000ms = 1 second per frame at 1x speed)
+ * @param initialSpeed - Initial playback speed multiplier (default 4)
  */
 export function usePlayback(
   totalFrames: number,
-  baseInterval: number = 1000
+  baseInterval: number = 1000,
+  initialSpeed: number = 4
 ): UsePlaybackReturn {
   const [currentTimeIndex, setCurrentTimeIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(4); // Speed multiplier (1x = normal, 2x = double speed)
+  const [playbackSpeed, setPlaybackSpeed] = useState(initialSpeed); // Speed multiplier (1x = normal, 2x = double speed)
 
   /**
    * Auto-play animation effect

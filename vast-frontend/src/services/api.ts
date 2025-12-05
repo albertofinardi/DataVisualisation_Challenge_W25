@@ -6,6 +6,7 @@ import { MAP_CONFIG } from '../config/map.config';
 import type { TemporalHeatmapData, StaticHeatmapData, LocationDetails, Bounds } from '../types/heatmap.types';
 import type { StreamgraphDataResponse } from '../types/streamgraph.types';
 import type { ActivityTimelineDataResponse, ParticipantTimelineDataResponse } from '../types/activity-calendar.types';
+import type { ParticipantComparisonResponse } from '../types/participant-comparison.types';
 
 const { baseUrl } = MAP_CONFIG.api;
 
@@ -166,6 +167,30 @@ export const api = {
     const response = await fetch(`${baseUrl}/activity-calendar/timeline?${queryParams}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch participant timeline data: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch participant comparison data
+   */
+  async fetchParticipantComparison(params: {
+    participant1: number;
+    participant2: number;
+    start?: string;
+    end?: string;
+  }): Promise<ParticipantComparisonResponse> {
+    const queryParams = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, String(value)])
+      )
+    );
+
+    const response = await fetch(`${baseUrl}/participant-comparison/compare?${queryParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch participant comparison data: ${response.statusText}`);
     }
     return response.json();
   },

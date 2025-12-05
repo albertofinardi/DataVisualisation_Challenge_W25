@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, MapPin, Activity, Calendar } from 'lucide-react';
+import { Home, MapPin, Activity, Calendar, Users } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -55,6 +55,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               <Calendar className="h-4 w-4" />
               Activity Calendar
+            </Link>
+            <Link
+              to="/participant-comparison"
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActive('/participant-comparison')
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              Compare
             </Link>
           </nav>
         </div>
