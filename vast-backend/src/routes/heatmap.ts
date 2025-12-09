@@ -214,7 +214,8 @@ router.get('/locations', async (req: Request, res: Response) => {
       end,
       cell_size = 100,
       time_bucket_minutes = 60,
-      include_temporal = 'true'
+      include_temporal = 'true',
+      interest_groups
     } = req.query;
 
     console.log('Heatmap /locations params:', req.query);
@@ -223,27 +224,45 @@ router.get('/locations', async (req: Request, res: Response) => {
     const timeBucket = Number(time_bucket_minutes);
     const includeTemporal = include_temporal === 'true';
 
+    // Parse interest_groups parameter (can be comma-separated or array)
+    let interestGroupsArray: string[] | null = null;
+    if (interest_groups) {
+      if (Array.isArray(interest_groups)) {
+        interestGroupsArray = interest_groups as string[];
+      } else if (typeof interest_groups === 'string') {
+        interestGroupsArray = interest_groups.split(',').map(g => g.trim()).filter(g => g.length > 0);
+      }
+    }
+
     let query = `
       WITH location_data AS (
         SELECT
-          participant_id,
-          timestamp,
-          ST_X(current_location) as longitude,
-          ST_Y(current_location) as latitude
-        FROM participant_status_logs
-        WHERE current_location IS NOT NULL
+          psl.participant_id,
+          psl.timestamp,
+          ST_X(psl.current_location) as longitude,
+          ST_Y(psl.current_location) as latitude,
+          p.interest_group
+        FROM participant_status_logs psl
+        JOIN participants p ON psl.participant_id = p.participant_id
+        WHERE psl.current_location IS NOT NULL
     `;
 
     const params: any[] = [];
 
     if (start) {
       params.push(start);
-      query += ` AND timestamp >= $${params.length}`;
+      query += ` AND psl.timestamp >= $${params.length}`;
     }
 
     if (end) {
       params.push(end);
-      query += ` AND timestamp <= $${params.length}`;
+      query += ` AND psl.timestamp <= $${params.length}`;
+    }
+
+    // Add interest group filter
+    if (interestGroupsArray && interestGroupsArray.length > 0) {
+      params.push(interestGroupsArray);
+      query += ` AND p.interest_group = ANY($${params.length})`;
     }
 
     query += `
@@ -251,8 +270,8 @@ router.get('/locations', async (req: Request, res: Response) => {
       grid_data AS (
         SELECT
           participant_id,
+          interest_group,
     `;
-
 
     // Add time bucket column if requested
     if (includeTemporal) {
@@ -272,37 +291,51 @@ router.get('/locations', async (req: Request, res: Response) => {
           ${includeTemporal ? 'time_bucket,' : ''}
           grid_x,
           grid_y,
+          interest_group,
           COUNT(DISTINCT participant_id) as count,
           grid_x + ${cellSize / 2} as center_longitude,
           grid_y + ${cellSize / 2} as center_latitude
         FROM grid_data
         GROUP BY
-          ${includeTemporal ? 'time_bucket,' : ''} grid_x, grid_y
+          ${includeTemporal ? 'time_bucket,' : ''} grid_x, grid_y, interest_group
+      ),
+      group_max AS (
+        SELECT interest_group, MAX(count) as max_count
+        FROM agg_data
+        GROUP BY interest_group
       ),
       global_max AS (
         SELECT MAX(count) as global_max_count FROM agg_data
       )
-      SELECT agg_data.*, global_max.global_max_count
-      FROM agg_data CROSS JOIN global_max
-      ORDER BY ${includeTemporal ? 'time_bucket, count DESC' : 'count DESC'}
+      SELECT agg_data.*, gm.max_count as group_max_count, global_max.global_max_count
+      FROM agg_data
+      LEFT JOIN group_max gm ON agg_data.interest_group = gm.interest_group
+      CROSS JOIN global_max
+      ORDER BY ${includeTemporal ? 'time_bucket, interest_group, count DESC' : 'interest_group, count DESC'}
     `;
     const result = await pool.query(query, params);
 
-    // Extract globalMaxCount from the first row (all rows have it)
+    // Extract globalMaxCount and groupMaxCounts from the first row (all rows have it)
     let globalMaxCount = 1;
-    if (result.rows.length > 0 && result.rows[0].global_max_count) {
+    const groupMaxCounts: Record<string, number> = {};
+
+    if (result.rows.length > 0 && result.rows[0].global_max_count !== null && result.rows[0].global_max_count !== undefined) {
       globalMaxCount = parseInt(result.rows[0].global_max_count);
     }
-      if (result.rows.length > 0 && result.rows[0].global_max_count !== null && result.rows[0].global_max_count !== undefined) {
-        globalMaxCount = parseInt(result.rows[0].global_max_count);
-      }
 
-    // Transform the response to group by time bucket
+    // Extract max count per group
+    result.rows.forEach((row: any) => {
+      if (row.interest_group && row.group_max_count) {
+        groupMaxCounts[row.interest_group] = parseInt(row.group_max_count);
+      }
+    });
+
+    // Transform the response to group by time bucket and interest group
     if (includeTemporal) {
       const groupedData: { [key: string]: any[] } = {};
 
       result.rows.forEach((row: any) => {
-        const { time_bucket, global_max_count, ...locationData } = row;
+        const { time_bucket, global_max_count, group_max_count, ...locationData } = row;
         const timeKey = time_bucket.toISOString();
 
         if (!groupedData[timeKey]) {
@@ -312,11 +345,11 @@ router.get('/locations', async (req: Request, res: Response) => {
         groupedData[timeKey].push(locationData);
       });
 
-      return res.json({ data: groupedData, globalMaxCount });
+      return res.json({ data: groupedData, globalMaxCount, groupMaxCounts });
     } else {
       // For non-temporal queries, wrap in an "all" key
-      const allRows = result.rows.map(({ global_max_count, ...row }) => row);
-      return res.json({ all: allRows, globalMaxCount });
+      const allRows = result.rows.map(({ global_max_count, group_max_count, ...row }) => row);
+      return res.json({ all: allRows, globalMaxCount, groupMaxCounts });
     }
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
