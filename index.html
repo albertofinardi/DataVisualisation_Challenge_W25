@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+<style>
+body {
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    color: black;
+    margin: 1in;
+    line-height: 1.15;
+}
+
+h2 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0;
+}
+
+h3 {
+    font-size: 13.5pt;
+    font-weight: bold;
+    margin: 0;
+}
+
+p {
+    margin: 0 0 10pt 0;
+}
+
+a {
+    color: blue;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: purple;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+.calibri {
+    font-family: Calibri, sans-serif;
+    font-size: 11pt;
+}
+
+.arial {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+}
+
+.center {
+    text-align: center;
+}
+
+.indent {
+    margin-left: 0.25in;
+}
+
+.divider {
+    border-bottom: 1pt solid black;
+    padding-bottom: 1pt;
+    margin-bottom: 10pt;
+}
+</style>
+</head>
+<body>
+
+<h2 class="calibri center">Entry Name: Data Visualization Group 5</h2>
+
+<h2 class="calibri center">VAST Challenge 2022<br><u>Challenge 2</u></h2>
+
+<h3 class="calibri">&nbsp;</h3>
+
+<h3 class="calibri">&nbsp;</h3>
+
+<h3 class="calibri">Team Members:</h3>
+
+<p class="calibri">Alberto Finardi, Tommaso Crippa, Tom Gave</p>
+
+<p class="calibri"><b>Student Team:</b> <i>Yes</i></p>
+
+<h3 class="calibri">Tools Used:</h3>
+
+<p class="calibri"><i>d3</p>
+
+<p class="calibri"><i>React</p>
+
+<p class="calibri"><i>PostgreSQL</p>
+
+<p class="calibri"><i>Docker</p>
+
+<p class="calibri"><i>NodeJS</p>
+
+<p class="calibri"><i>Bruno</p>
+
+<p class="calibri"><b>Approximately how many hours were spent working on this submission in total?</b> 32</p>
+
+<p class="calibri"><b>Video</b></p>
+
+<p class="calibri"><b><a href="http://www.youtube.com/ul-smith-mc1-video.avi" class="highlight">http://www.youtube.com/ul-smith-mc1-video.avi</a></b></p>
+
+<div class="divider"></div>
+
+<p class="arial">Use visual analytics to analyze the available data and develop responses to the questions to be provided. In addition, prepare a video that shows how you used visual analytics to solve this challenge.</p>
+
+<p>&nbsp;</p>
+
+<p class="calibri"><b>Questions</b></p>
+
+<p class="calibri"><b>1</b> - <span class="arial">Assuming the volunteers are representative of the city's population, characterize the distinct areas of the city that you identify. For each area you identify, provide your rationale and supporting data. Limit your response to 10 images and 500 words.</span></p>
+
+<div class="indent">
+<p class="arial"><b>Overview</b></p>
+
+<p class="arial">The city extends within an approximately 8km × 8km square region mapped using a coordinate grid dynamically settable. Multiple distinct zones are identifiable through building type distribution, activity patterns, and movement corridors. Large undeveloped or inaccessible areas exist within the city boundaries, particularly in the north-east and south-west edges.</p>
+
+<p class="calibri center"><b>[SCREENSHOT 1: Building Types Overview Map - /building-polygons]</b></p>
+<p class="calibri center"><i>Figure 1. Overview map showing building type distribution across the city with coordinate grid overlay, highlighting residential (apartments) and commercial (employers, restaurants, pubs) zones.</i></p>
+
+<p class="arial"><b>Downtown Commercial Core</b></p>
+
+<p class="arial">The regions A1, B2 and C2 exhibit dominant commercial function, with high concentrations of employer buildings and eating venues supporting business activity. An additional zone at C3 shows notable ammount of commercial buildings, but only a single pub and few restaurants.</p>
+
+<p class="calibri center"><img src="img/commercial_buildings_map.png" alt="Commercial Building Distribution" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2. Building type map filtered to show employers, restaurants, and pubs.</i></p>
+
+<p class="calibri center"><img src="img/business_hours_activity_heatmap.png" alt="Business Hours Activity Heatmap" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 3. Activity density heatmap during business hours showing concentrated activity in downtown zones.</i></p>
+
+<p class="arial"><b>Residential Areas</b></p>
+
+<p class="arial">Zones A1-2, B3-4, D2 and D4 are predominantly residential, characterized by high apartment density.</p>
+
+<p class="calibri center"><img src="img/residential_buildings_map.png" alt="Residential Building Distribution" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 4. Map filtered to apartments only.</i></p>
+
+<p class="calibri center"><img src="img/evening_activity_heatmap.png" alt="Evening Activity Heatmap" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 5. Evening activity heatmap showing residential area activity in the residential zones.</i></p>
+
+<p class="arial"><b>Mixed Suburban Character</b></p>
+
+<p class="arial">The peripheral zones (northwest, southeast) demonstrate mixed residential-commercial patterns, with residential dominance toward outer edges. Zones in the northwest features suburban residential on its western side with commercial activity eastward, notably connected to the city only via a single major route, creating potential infrastructure constraints. Zones in the southeast exhibits suburban housing with commercial activity on the city-facing (western) side.</p>
+
+<p class="calibri center"><img src="img/mixed_activity_map.png" alt="Mixed Activity Zones" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 6. Mixed-use activity areas in outer zones.</i></p>
+
+<p class="arial"><b>Movement Patterns and Connectivity</b></p>
+
+<p class="arial">Movement patterns reveal distinct connecting roads that form edges between activity zones. A major east-west corridor connects the western zones (A-B) to the central downtown (D-F). The northwest zone (A1-B3) has limited connectivity via a single major route. Job opportunities concentrate in northern zones (rows 1-3) but distribute throughout non-residential parts of the entire city, creating travel infrastructure demands.</p>
+
+<p class="calibri center"><img src="img/morning_rush_hour_activity.png" alt="Morning Rush Hour Activity" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 8. Morning rush hour activity showing movement patterns toward employment centers in zones B2-C3 and C3-E4.</i></p>
+
+<p class="calibri center"><img src="img/activity_streamgraph.png" alt="Temporal Activity Comparison" height="512"></p>
+<p class="calibri center"><i>Figure 9. Side-by-side comparison of activity patterns at different times of day, illustrating the functional distinction between commercial and residential zones.</i></p>
+
+<p class="arial"><b>Summary</b></p>
+
+<p class="arial">The residential-commercial distinction clearly emerges through building type analysis, with zones serving downtown functions while other provide housing. Mixed-use zones transition from commercial on their city-facing sides to residential at their peripheries. The boundary zones represent a critical infrastructure planning area due to high mixed-use density.</p>
+
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10pt;">
+<tr style="background-color: #f0f0f0;">
+<th>Zone</th>
+<th>Primary Character</th>
+<th>Key Features</th>
+<th>Connectivity</th>
+</tr>
+<tr>
+<td>North-West</td>
+<td>Mixed (residential west, commercial east)</td>
+<td>Northwest suburban, limited access</td>
+<td>Single major route</td>
+</tr>
+<tr>
+<td>Central-north</td>
+<td>Commercial center</td>
+<td>Restaurants/pubs, peripheral activity</td>
+<td>Well-connected</td>
+</tr>
+<tr>
+<td>Central-south</td>
+<td>Downtown core</td>
+<td>North: employment, South: residential</td>
+<td>Central hub</td>
+</tr>
+<tr>
+<td>East</td>
+<td>Mixed suburban</td>
+<td>Northeast residential outskirts</td>
+<td>Good connectivity</td>
+</tr>
+<tr>
+<td>South</td>
+<td>Mixed suburban</td>
+<td>Southeast apartments, some commerce</td>
+<td>Moderate connectivity</td>
+</tr>
+</table>
+</div>
+
+<p class="calibri"><b>2</b> - <span class="arial">Where are the busiest areas in Engagement? Are there traffic bottlenecks that should be addressed? Explain your rationale. Limit your response to 10 images and 500 words.</span></p>
+
+<div class="indent">
+<p class="arial"><b>Overview</b></p>
+
+<p class="arial">Analyzing movement patterns reveals concentrated activity along specific corridors connecting residential and commercial zones. Temporal analysis shows distinct peak periods when roads experience maximum usage, creating potential bottlenecks that could benefit from infrastructure improvements.</p>
+
+<p class="arial"><b>Overall Activity Density</b></p>
+
+<p class="arial">The heatmap of all participant locations throughout the study period reveals clear high-density zones. The busiest areas concentrate in zones B2-C3 (downtown commercial core), with secondary activity centers at A1-B1 (northwest mixed zone) and D3-E4 (eastern residential-commercial transition). Major connecting corridors between these zones show sustained high usage throughout the day.</p>
+
+<p class="calibri center"><img src="img/overall_activity_density.png" alt="Overall Activity Density" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.1. Overall participant activity density showing busiest areas across the entire study period.</i></p>
+
+<p class="arial"><b>Rush Hour Movement Patterns</b></p>
+
+<p class="arial">Morning rush hours (7-9 AM) exhibit concentrated movement from residential zones (A2, B4, D2, D4) toward employment centers in B2-C3. The roads connecting these areas become primary bottlenecks, particularly the major east-west corridor linking zones A-B to C-D, and the single connecting route to the northwest zone A1-B1.</p>
+
+<p class="calibri center"><img src="img/morning_commute_heatmap.png" alt="Morning Rush Hour Density" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.2. Morning rush hour (7-9 AM) activity showing concentrated movement toward employment centers.</i></p>
+
+<p class="arial">Evening rush hours (5-7 PM) reverse this pattern, with heavy traffic from commercial zones back to residential areas. The same corridors experience bidirectional bottlenecks, compounded by social activity beginning simultaneously as work ends.</p>
+
+<p class="calibri center"><img src="img/evening_commute_heatmap.png" alt="Evening Rush Hour Density" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.3. Evening rush hour (5-7 PM) showing return traffic to residential zones plus social activity.</i></p>
+
+<p class="arial"><b>Activity Type Analysis</b></p>
+
+<p class="arial">The streamgraph visualization reveals temporal patterns across different activity modes. Work-related activity dominates weekday daytime hours (8 AM-6 PM), while social/recreation activities peak during evenings and weekends. Eating-related movement shows trimodal patterns around meal times, creating predictable congestion at 8 AM, 12 PM, and 6-7 PM.</p>
+
+<p class="calibri center"><img src="img/activity_modes_streamgraph.png" alt="Activity Modes Over Time" height="512"></p>
+<p class="calibri center"><i>Figure 2.4. Temporal distribution of activity modes showing work, social, and eating patterns throughout the study period.</i></p>
+
+<p class="arial"><b>Critical Bottleneck Routes</b></p>
+
+<p class="arial">Three critical bottlenecks emerge from the analysis:</p>
+
+<p class="arial"><b>Route 1 (Northwest Connector):</b> The single major road connecting the northwest zone (A1-B1) to the central city creates severe congestion during peak hours. This route serves a substantial residential and commercial population with no alternative paths, making it the most critical bottleneck in the city.</p>
+
+<p class="calibri center"><img src="img/northwest_bottleneck.png" alt="Northwest Route Bottleneck" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.5. Northwest connector route showing heavy single-path dependency during morning commute.</i></p>
+
+<p class="arial"><b>Route 2 (Central East-West Corridor):</b> The primary east-west corridor connecting zones A-B to C-D experiences sustained high traffic throughout business hours. Multiple residential areas funnel through this route to reach downtown employment centers.</p>
+
+<p class="calibri center"><img src="img/central_corridor_density.png" alt="Central Corridor Density" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.6. Central east-west corridor showing sustained high-density usage throughout business hours.</i></p>
+
+<p class="arial"><b>Route 3 (Southern Connector):</b> Roads connecting the southeastern zones (D4-E4) to the central downtown create bottlenecks during both morning and evening rush hours, particularly where multiple residential areas converge.</p>
+
+<p class="arial"><b>Workplace and Venue Concentrations</b></p>
+
+<p class="arial">The concentration of employers in zones B2-C3 creates natural traffic convergence points. Similarly, popular pubs and restaurants in the central area (C2-C3) draw evening traffic from across the city, compounding evening congestion on the same routes used for commuting.</p>
+
+<p class="calibri center"><img src="img/workplace_pub_locations.png" alt="Workplace and Pub Concentrations" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.7. Workplace and entertainment venue concentrations showing overlap in central zones that amplifies congestion.</i></p>
+
+<p class="arial"><b>Temporal Congestion Patterns</b></p>
+
+<p class="arial">Animating the heatmap reveals how congestion builds and dissipates throughout the day. Weekday patterns show sharp peaks during rush hours with relatively clear roads during midday and late evening. Weekend patterns differ significantly, with more distributed activity throughout daylight hours and higher social venue traffic in evenings.</p>
+
+<p class="calibri center"><img src="img/weekday_vs_weekend_patterns.png" alt="Weekday vs Weekend Patterns" height="400"></p>
+<p class="calibri center"><i>Figure 2.8. Comparison of weekday versus weekend activity patterns showing distinct temporal congestion profiles.</i></p>
+
+<p class="arial"><b>Journey Efficiency Analysis</b></p>
+
+<p class="arial">The limited road network forces many journeys to take indirect routes. Participants traveling between northwest (A1-B1) and eastern zones (D3-E4) must traverse through the congested central corridor, significantly increasing travel time. Similarly, residents in the southern zones face limited direct routes to workplaces, contributing to bottleneck formation.</p>
+
+<p class="calibri center"><img src="img/indirect_routes_visualization.png" alt="Indirect Journey Routes" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 2.9. Visualization of indirect routes showing forced detours through congested central zones.</i></p>
+
+<p class="arial"><b>Summary</b></p>
+
+<p class="arial">The busiest areas concentrate in zones B2-C3 with critical bottlenecks on routes connecting peripheral residential areas to this downtown core. The northwest connector represents the most severe single-point failure, while the central east-west corridor experiences sustained congestion. Infrastructure improvements should prioritize creating alternative routes and distributing commercial activity to reduce pressure on these critical bottlenecks.</p>
+</div>
+
+<p>&nbsp;</p>
+
+<p class="calibri"><b>3</b> - <span class="arial">Participants have given permission to have their daily routines captured. Choose two different participants with different routines and describe their daily patterns, with supporting evidence. Limit your response to 10 images and 500 words.</span></p>
+
+<div class="indent">
+<p class="arial"><b>Overview</b></p>
+
+<p class="arial">To identify participants with contrasting daily routines, we first analyzed activity patterns across the entire sample. Summary measures including joviality score, time spent traveling, socializing, eating, at home, and at work were calculated for each participant. Interactive exploration using parallel coordinates plots and activity calendars enabled selection of two representative individuals with distinctly different lifestyles.</p>
+
+<p class="arial"><b>Summary Measures</b></p>
+
+<table border="1" cellpadding="5" cellspacing="0" style="width: 80%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10pt; margin: 0 auto;">
+<tr style="background-color: #f0f0f0;">
+<th>Measure</th>
+<th>Label</th>
+</tr>
+<tr><td>Joviality score at start of period</td><td>joviality</td></tr>
+<tr><td>Average number of checked-in activities per day</td><td>activities</td></tr>
+<tr><td>Average minutes per day spent traveling</td><td>travel</td></tr>
+<tr><td>Average minutes per day in social activity</td><td>social</td></tr>
+<tr><td>Average minutes per day spent at eating venues</td><td>eat</td></tr>
+<tr><td>Average minutes per day spent at home</td><td>home</td></tr>
+<tr><td>Average minutes per day spent at work</td><td>work</td></tr>
+<tr><td>Average time of day participant leaves home each morning</td><td>leave</td></tr>
+<tr><td>Average time of day participant starts work each morning</td><td>start</td></tr>
+</table>
+
+<p class="arial"><b>Participant Selection</b></p>
+
+<p class="arial">Two participants were selected displaying contrasting patterns: Participant 266 representing a socially active individual with short commutes and high joviality, and Participant 845 representing a long-distance commuter with limited social activity and lower initial joviality.</p>
+
+<p class="arial"><b>Participant 266: The Social Local</b></p>
+
+<p class="arial">Participant 266 exhibits significantly below-average travel time, spending much less time commuting than typical participants. Their home and workplace are located in close proximity within zones B3-C3, enabling easy walking-distance commutes. They began the study period with higher than average joviality and maintain robust social activity throughout.</p>
+
+<p class="calibri center"><img src="img/participant_266_parallel_coords.png" alt="Participant 266 Parallel Coordinates" height="400"></p>
+<p class="calibri center"><i>Figure 3.1. Parallel coordinates plot showing Participant 266 (highlighted) compared to full sample, demonstrating low travel time and high social activity.</i></p>
+
+<p class="arial">The spatial distribution of their activities reveals concentration in the southern portions of zones B and C. Their favored social and dining venues cluster near their residence, minimizing travel requirements. Notably, their typical routes avoid the major traffic bottlenecks identified in Question 2 (Routes 1-8), likely contributing to their sustained high joviality.</p>
+
+<p class="calibri center"><img src="img/participant_266_location_map.png" alt="Participant 266 Location Map" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 3.2. Map showing home, workplace, and activity locations for Participant 266, demonstrating localized movement patterns.</i></p>
+
+<p class="arial">The activity calendar visualization provides detailed temporal insights across the 15-month study period. Participant 266 displays highly regular weekday work patterns with consistent start and end times. Their work schedule shows minimal variation, appearing as solid blocks in the calendar view. Weekend behavior contrasts sharply: one day (typically Sunday) features intensive socializing with 6-8 venue check-ins throughout the day, while the other (typically Saturday) involves primarily staying home.</p>
+
+<p class="calibri center"><img src="img/participant_266_activity_calendar.png" alt="Participant 266 Activity Calendar" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 3.3. Activity calendar for Participant 266 showing regular work patterns (red) and contrasting weekend behavior with social activities (blue) and home time (gray).</i></p>
+
+<p class="arial">A notable temporal pattern emerges in the initial four weeks, where social activity occurs at significantly higher frequency. This appears consistent with initial enthusiasm common across many participants at the study's start. Weekend social days typically begin around 8:30-9:00 AM with breakfast at an eating venue, followed by a full day of social activities punctuated by brief returns home, concluding around 11:00 PM.</p>
+
+<p class="calibri center"><img src="img/participant_266_weekly_pattern.png" alt="Participant 266 Weekly Pattern" height="300"></p>
+<p class="calibri center"><i>Figure 3.4. Typical weekly activity pattern for Participant 266 showing work-dominated weekdays and social-focused weekends.</i></p>
+
+<p class="arial"><b>Participant 845: The Long-Distance Commuter</b></p>
+
+<p class="arial">Participant 845 presents a contrasting profile, spending nearly three hours per day traveling on average—substantially above the sample mean. Their home in zone F and workplace in zone D necessitate long commutes traversing multiple bottleneck routes (Routes 5, 7, and 8). They began the study with below-average joviality and maintain limited social engagement, averaging only 20 minutes of social activity per day across the 15-month period.</p>
+
+<p class="calibri center"><img src="img/participant_845_parallel_coords.png" alt="Participant 845 Parallel Coordinates" height="400"></p>
+<p class="calibri center"><i>Figure 3.5. Parallel coordinates plot showing Participant 845 (highlighted) with high travel time and low social activity compared to the sample.</i></p>
+
+<p class="arial">Their spatial activity pattern reveals the geographic challenges they face. The substantial distance between home (zone F) and work (zone D) requires traversing congested corridors identified as major bottlenecks. Social activities, when they occur, involve even longer journeys, often requiring 1-1.5 hours of travel each direction for approximately 2 hours of socializing.</p>
+
+<p class="calibri center"><img src="img/participant_845_location_map.png" alt="Participant 845 Location Map" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 3.6. Map showing Participant 845's extended commute routes and dispersed activity locations across the city.</i></p>
+
+<p class="arial">The activity calendar reveals their demanding daily routine. Weekday mornings begin with departure from home at 7:00 AM, followed by an 80-minute commute, arriving at work around 8:20 AM. A brief lunch break occurs between 1:15-1:50 PM, involving short travel to a nearby eating venue in zone D. They finish work around 4:50 PM, facing another extended commute that brings them home just after 6:00 PM. Most evenings are spent at home, though Monday nights (and occasionally Tuesdays) involve social activity requiring additional substantial travel time.</p>
+
+<p class="calibri center"><img src="img/participant_845_activity_calendar.png" alt="Participant 845 Activity Calendar" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 3.7. Activity calendar for Participant 845 showing consistent long commutes (yellow/orange), regular work blocks (red), and limited social activity (blue).</i></p>
+
+<p class="arial">Weekend patterns for Participant 845 show afternoon trips to eating venues, with travel time frequently exceeding time spent at destinations. This pattern shows slight decline in frequency toward the latter portion of the study period, possibly indicating adjustment to minimize the burden of extensive travel.</p>
+
+<p class="calibri center"><img src="img/participant_845_travel_comparison.png" alt="Travel Time Comparison" height="300"></p>
+<p class="calibri center"><i>Figure 3.8. Comparison of travel patterns showing Participant 845's extensive commute versus Participant 266's minimal travel.</i></p>
+
+<p class="arial"><b>Comparative Analysis</b></p>
+
+<p class="arial">The contrast between these participants highlights how geographic location relative to workplace and amenities profoundly impacts daily experience. Participant 266's localized activity pattern enables high social engagement and likely contributes to sustained well-being. Participant 845's long-distance commute consumes substantial daily time, constraining opportunities for social connection and potentially contributing to lower initial joviality.</p>
+
+<p class="calibri center"><img src="img/participant_comparison_summary.png" alt="Participant Comparison Summary" height="400"></p>
+<p class="calibri center"><i>Figure 3.9. Side-by-side comparison of key metrics for both participants showing stark contrasts in lifestyle patterns.</i></p>
+
+<p class="arial"><b>Summary</b></p>
+
+<p class="arial">These two participants exemplify the spectrum of daily experiences in Engagement. Participant 266 benefits from proximity between home, work, and social venues, enabling an active social life with minimal travel burden. Participant 845 faces geographic constraints requiring extensive daily commuting through congested routes, limiting social opportunities and consuming significant time. These patterns underscore the importance of urban planning that considers residential-workplace proximity and transportation infrastructure in supporting quality of life.</p>
+
+<p class="calibri center"><img src="img/activity_distribution_comparison.png" alt="Activity Distribution Comparison" height="300"></p>
+<p class="calibri center"><i>Figure 3.10. Activity mode distribution comparison showing how travel dominates Participant 845's day while Participant 266 balances work, social, and home activities.</i></p>
+</div>
+
+<p>&nbsp;</p>
+
+<p class="calibri"><b>4</b> - <span class="arial">Over the span of the dataset, how do patterns change in the city change? Describe up to 10 significant changes, with supporting evidence. Limit your response to 10 images and 500 words.</span></p>
+
+<div class="indent">
+<p class="arial"><b>Overview</b></p>
+
+<p class="arial">The 15-month study period (450 days) reveals multiple significant temporal changes in city activity patterns. To facilitate spatio-temporal analysis, we created virtual traffic sensors at critical infrastructure points corresponding to the bottleneck routes identified in Question 2. Each sensor monitors bidirectional traffic flow across 500-meter zones—sufficient to capture all movement given the 5-minute sampling interval and typical travel speeds. These sensors enable systematic tracking of traffic volume changes across time scales from daily cycles to long-term trends.</p>
+
+<p class="calibri center"><img src="img/virtual_sensor_locations.png" alt="Virtual Traffic Sensor Locations" width="512" height="512"></p>
+<p class="calibri center"><i>Figure 4.1. Virtual traffic sensor locations at key bottleneck points across the city's road network.</i></p>
+
+<p class="arial"><b>Change 1: Initial Activity Decline</b></p>
+
+<p class="arial">The most dramatic change occurs during the first 60 days of the study. All virtual sensors register substantially higher traffic volumes during the opening week, followed by steady decline over the subsequent two months. After approximately day 60, traffic volumes stabilize at equilibrium levels that persist throughout the remaining study period. This pattern suggests initial participant enthusiasm or novelty effect that gradually normalizes to representative behavior.</p>
+
+<p class="calibri center"><img src="img/traffic_volume_450_days.png" alt="Traffic Volume Over 450 Days" width="800" height="500"></p>
+<p class="calibri center"><i>Figure 4.2. Traffic volumes at all sensors over the 450-day study period, showing initial peak and subsequent stabilization. Red/blue indicate directional flow.</i></p>
+
+<p class="arial"><b>Change 2: Social Activity Burst</b></p>
+
+<p class="arial">Activity calendar analysis reveals intensive social activity (venue check-ins) during the first 3-4 weeks across many participants. This pattern, observable in participants like 266 (Question 3) and 797, shows markedly higher frequency of social events before settling into more regular routines. This behavioral change contributes significantly to the elevated traffic volumes observed in Change 1, as social activities often require longer travel distances than routine work-home commutes.</p>
+
+<p class="calibri center"><img src="img/participant_797_calendar.png" alt="Participant 797 Activity Calendar" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 4.3. Activity calendar for Participant 797 showing intense social activity (blue) in opening weeks before stabilizing to regular patterns.</i></p>
+
+<p class="arial"><b>Change 3: Periodic Behavior Modifications</b></p>
+
+<p class="arial">Beyond the initial adjustment period, many participants exhibit periodic changes in social and eating behavior throughout the 15 months. These appear as clustered bursts of activity variation, including shifts in weekend routines and evening activities. Participant 744 exemplifies this pattern with several distinct periods of altered behavior, suggesting lifestyle adjustments, seasonal variations, or personal circumstance changes affecting multiple individuals simultaneously.</p>
+
+<p class="calibri center"><img src="img/participant_744_calendar.png" alt="Participant 744 Activity Calendar" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 4.4. Activity calendar for Participant 744 showing periodic bursts of behavioral change in social and eating activities.</i></p>
+
+<p class="arial"><b>Change 4: Daily Commute Patterns</b></p>
+
+<p class="arial">Daily weekday patterns show pronounced morning (7-9 AM) and evening (5-7 PM) rush hour peaks, most prominently at Sensor 1 (northwest connector). Notably, most sensors show relatively balanced bidirectional flow, indicating commuters generally return via similar routes. Traffic volumes reach minimum levels between midnight and 5 AM, with gradual build-up beginning around 6 AM.</p>
+
+<p class="calibri center"><img src="img/daily_traffic_patterns_all_sensors.png" alt="24-Hour Traffic Patterns" width="800" height="600"></p>
+<p class="calibri center"><i>Figure 4.5. Average traffic volume over 24 hours at all sensor locations (5-minute intervals averaged across 450 days). Red/blue indicate directional flow.</i></p>
+
+<p class="arial"><b>Change 5: Tidal Traffic Flow at Residential Connectors</b></p>
+
+<p class="arial">While most sensors show balanced bidirectional traffic, Sensors 6 and 6b (connecting major residential zones) exhibit strong tidal effects. Morning flows heavily inbound toward commercial centers, while evening flows reverse dramatically outbound toward residential areas. This asymmetry reflects the residential-commercial separation in city planning and demonstrates concentrated demand on specific connecting routes during peak periods.</p>
+
+<p class="arial"><b>Change 6: Weekday-Weekend Activity Shifts</b></p>
+
+<p class="arial">Weekend activity patterns differ fundamentally from weekdays. Morning movement at 8 AM on weekdays consists predominantly of work commutes, while equivalent Saturday morning traffic comprises social and eating-related travel. This functional shift redistributes traffic spatially, with different routes experiencing peak demand based on day of week.</p>
+
+<p class="calibri center"><img src="img/weekday_vs_weekend_8am.png" alt="Weekday vs Weekend 8am Comparison" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 4.6. Comparison of 8 AM movement on weekdays (left) versus weekends (right), colored by destination activity type.</i></p>
+
+<p class="arial"><b>Change 7: Zone-Specific Weekend Traffic Variations</b></p>
+
+<p class="arial">Sensors 3 and 6 demonstrate contrasting weekend responses. Sensor 3 (serving primarily commercial Area B) shows significant traffic decline on weekends, while Sensor 6 (residential Area E connector) experiences weekend traffic increases. This reflects functional zone character: commercial areas see reduced activity while residential areas maintain or increase traffic as residents engage in discretionary weekend activities.</p>
+
+<p class="calibri center"><img src="img/sensor_3_6_weekday_weekend.png" alt="Sensors 3 and 6 Weekday-Weekend Patterns" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 4.7. Traffic volume comparison for Sensors 3 and 6 showing contrasting weekday-weekend patterns based on zone function.</i></p>
+
+<p class="arial"><b>Change 8: Midday Activity Lull</b></p>
+
+<p class="arial">All sensors show consistent midday traffic reduction between 10 AM and 2 PM on weekdays. This lull reflects participants settling into stationary work activities, with only brief lunch-related travel creating minor peaks around noon. Weekend midday patterns remain more elevated and variable, consistent with discretionary activity timing flexibility.</p>
+
+<p class="calibri center"><img src="img/midday_activity_patterns.png" alt="Midday Activity Patterns" width="800" height="300"></p>
+<p class="calibri center"><i>Figure 4.8. Detailed midday traffic patterns (10 AM-2 PM) showing weekday lull versus sustained weekend activity.</i></p>
+
+<p class="arial"><b>Change 9: Evening Social Activity Peak</b></p>
+
+<p class="arial">Post-work hours (7-11 PM) show distinctive activity patterns differing from morning commutes. The streamgraph reveals transition from work activities to social and eating activities during these hours. Traffic sensors show this translates to sustained but more distributed traffic compared to concentrated morning rush hour peaks, as social destinations scatter more widely than workplace concentrations.</p>
+
+<p class="calibri center"><img src="img/evening_activity_transition.png" alt="Evening Activity Transition" height="400"></p>
+<p class="calibri center"><i>Figure 4.9. Streamgraph detail showing evening transition from work to social/eating activities (7-11 PM).</i></p>
+
+<p class="arial"><b>Change 10: Long-Term Equilibrium Stability</b></p>
+
+<p class="arial">Following the initial 60-day adjustment period, the city demonstrates remarkable long-term stability in aggregate activity patterns. Day-to-day variations persist, but overall traffic volumes, timing distributions, and spatial patterns remain consistent across the remaining 13 months. This suggests the city reaches a steady-state operational mode where participant behaviors, while individually variable, produce predictable aggregate patterns suitable for infrastructure planning.</p>
+
+<p class="calibri center"><img src="img/longterm_stability_analysis.png" alt="Long-term Pattern Stability" width="800" height="400"></p>
+<p class="calibri center"><i>Figure 4.10. Statistical analysis of traffic volume stability comparing days 60-150, 151-300, and 301-450, showing consistent equilibrium.</i></p>
+
+<p class="arial"><b>Summary</b></p>
+
+<p class="arial">The 15-month study reveals distinct temporal change patterns operating at multiple time scales. Initial participant adjustment drives dramatic early changes before stabilizing after 60 days. Daily and weekly cycles create predictable traffic patterns dominated by work commutes on weekdays and discretionary activities on weekends. Zone-specific characteristics produce contrasting responses to temporal patterns, with commercial areas experiencing weekday peaks and residential connectors showing tidal flows. Long-term stability following the adjustment period suggests the observed patterns accurately represent typical city functioning, validating infrastructure planning based on these data.</p>
+</div>
+
+<p>&nbsp;</p>
+
+</body>
+</html>
