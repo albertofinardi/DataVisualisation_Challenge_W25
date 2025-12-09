@@ -16,15 +16,32 @@ import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useStreamgraphData } from "@/hooks/useStreamgraphData";
+import { STREAMGRAPH_CONFIG } from "@/config/streamgraph.config";
+
+// Time bucket options: minutes
+const TIME_BUCKET_OPTIONS = [
+  { label: '15 mins', value: 15 },
+  { label: '30 mins', value: 30 },
+  { label: '1 hour', value: 60 },
+  { label: '6 hours', value: 360 },
+  { label: '12 hours', value: 720 },
+  { label: '24 hours', value: 1440 },
+  { label: '7 days', value: 10080 },
+  { label: '1 month', value: 43200 },
+];
 
 export function StreamgraphViewer() {
   const [showDataConfig, setShowDataConfig] = useState(true);
-  const [timeBucketMinutes, setTimeBucketMinutes] = useState(60);
+  const [timeBucketIndex, setTimeBucketIndex] = useState(2); // Default to 1 hour
   const [startDate, setStartDate] = useState("2022-03-21");
   const [startTime, setStartTime] = useState("03:00");
   const [endDate, setEndDate] = useState("2022-03-22");
   const [endTime, setEndTime] = useState("03:00");
+  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>([]);
+
+  const timeBucketMinutes = TIME_BUCKET_OPTIONS[timeBucketIndex].value;
 
   const {
     streamgraphData,
@@ -43,8 +60,35 @@ export function StreamgraphViewer() {
       endDate,
       endTime,
       timeBucketMinutes,
+      interestGroups: selectedInterestGroups.length > 0 ? selectedInterestGroups : undefined,
     });
   };
+
+  const handleInterestGroupToggle = (group: string) => {
+    setSelectedInterestGroups((prev) =>
+      prev.includes(group)
+        ? prev.filter((g) => g !== group)
+        : [...prev, group]
+    );
+  };
+
+  const handleSelectAllInterestGroups = () => {
+    if (selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length) {
+      setSelectedInterestGroups([]);
+    } else {
+      setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
+    }
+  };
+
+  // Check if date range is valid (at least as long as the time bucket)
+  const isDateRangeValid = () => {
+    const start = new Date(`${startDate}T${startTime}:00`);
+    const end = new Date(`${endDate}T${endTime}:00`);
+    const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+    return diffMinutes >= timeBucketMinutes * 2;
+  };
+
+  const canApplySettings = isDateRangeValid();
 
   if (loading) return <LoadingSpinner />;
 
@@ -136,21 +180,72 @@ export function StreamgraphViewer() {
             {/* Time Bucket */}
             <div className="space-y-2">
               <Label className="flex items-center justify-between text-sm font-medium">
-                <span>Time Bucket (minutes)</span>
-                <span className="text-accent font-semibold">{timeBucketMinutes}</span>
+                <span>Time Bucket</span>
+                <span className="text-accent font-semibold">{TIME_BUCKET_OPTIONS[timeBucketIndex].label}</span>
               </Label>
               <Slider
-                value={[timeBucketMinutes]}
-                onValueChange={(v) => setTimeBucketMinutes(v[0])}
-                min={1}
-                max={120}
+                value={[timeBucketIndex]}
+                onValueChange={(v) => setTimeBucketIndex(v[0])}
+                min={0}
+                max={TIME_BUCKET_OPTIONS.length - 1}
                 step={1}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                Aggregate data into {timeBucketMinutes}-minute intervals
+                Aggregate data into {TIME_BUCKET_OPTIONS[timeBucketIndex].label} intervals
               </p>
             </div>
+
+            {/* Interest Groups Filter */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">
+                  Filter by Interest Groups
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSelectAllInterestGroups}
+                  className="h-8 text-xs"
+                >
+                  {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
+                    ? 'Deselect All'
+                    : 'Select All'}
+                </Button>
+              </div>
+              <div className="grid grid-cols-5 gap-3 p-4 border rounded-lg bg-muted/30">
+                {STREAMGRAPH_CONFIG.interestGroups.map((group) => (
+                  <div key={group} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`interest-${group}`}
+                      checked={selectedInterestGroups.includes(group)}
+                      onCheckedChange={() => handleInterestGroupToggle(group)}
+                    />
+                    <label
+                      htmlFor={`interest-${group}`}
+                      className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Group {group}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {selectedInterestGroups.length === 0
+                  ? 'All interest groups will be included'
+                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''}`}
+              </p>
+            </div>
+
+            {/* Validation Message */}
+            {!canApplySettings && (
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                <p className="text-sm text-destructive">
+                  Date range must be at least 2x {TIME_BUCKET_OPTIONS[timeBucketIndex].label} long.
+                  Current selection is too short for the selected time bucket.
+                </p>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3">
@@ -163,6 +258,7 @@ export function StreamgraphViewer() {
               <Button
                 onClick={handleApplySettings}
                 className="bg-accent hover:bg-accent/90"
+                disabled={!canApplySettings}
               >
                 Apply Settings
               </Button>

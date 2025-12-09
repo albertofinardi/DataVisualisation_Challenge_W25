@@ -7,6 +7,7 @@ interface ParticipantInfoPanelProps {
   participantId: string;
   info: ParticipantInfo;
   activityDistribution: ActivityDistribution;
+  totalDistance: number;
 }
 
 const EDUCATION_LABELS: { [key: string]: string } = {
@@ -16,10 +17,11 @@ const EDUCATION_LABELS: { [key: string]: string } = {
   'Graduate': 'Graduate Degree'
 };
 
-export function ParticipantInfoPanel({ 
-  participantId, 
-  info, 
-  activityDistribution 
+export function ParticipantInfoPanel({
+  participantId,
+  info,
+  activityDistribution,
+  totalDistance
 }: ParticipantInfoPanelProps) {
   // Prepare pie chart data
   const pieData = Object.entries(activityDistribution).map(([mode, count]) => ({
@@ -33,6 +35,14 @@ export function ParticipantInfoPanel({
   const renderLabel = (entry: any) => {
     const percent = ((entry.value / totalCount) * 100).toFixed(1);
     return `${percent}%`;
+  };
+
+  // Format distance to be more readable
+  const formatDistance = (distance: number): string => {
+    if (distance >= 1000) {
+      return `${(distance / 1000).toFixed(2)} units`;
+    }
+    return `${distance.toFixed(2)} m`;
   };
 
   return (
@@ -69,6 +79,12 @@ export function ParticipantInfoPanel({
               <p className="font-medium">{(info.joviality * 100).toFixed(1)}%</p>
             </div>
           </div>
+
+          {/* Distance Travelled */}
+          <div className="pt-3 border-t">
+            <span className="text-muted-foreground text-sm">Distance Travelled:</span>
+            <p className="font-semibold text-lg text-accent">{formatDistance(totalDistance)}</p>
+          </div>
         </CardContent>
       </Card>
 
@@ -97,12 +113,6 @@ export function ParticipantInfoPanel({
                   />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value: number) => {
-                  const percent = ((value / totalCount) * 100).toFixed(1);
-                  return `${value.toLocaleString()} (${percent}%)`;
-                }}
-              />
               <Legend 
                 verticalAlign="bottom" 
                 height={36}

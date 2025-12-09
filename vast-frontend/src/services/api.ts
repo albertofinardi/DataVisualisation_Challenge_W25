@@ -111,14 +111,19 @@ export const api = {
     start?: string;
     end?: string;
     time_bucket_minutes?: number;
+    interest_groups?: string[];
   }): Promise<StreamgraphDataResponse> {
-    const queryParams = new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(params)
-          .filter(([, value]) => value !== undefined)
-          .map(([key, value]) => [key, String(value)])
-      )
-    );
+    const queryParams = new URLSearchParams();
+
+    // Add simple params
+    Object.entries(params)
+      .filter(([key, value]) => value !== undefined && key !== 'interest_groups')
+      .forEach(([key, value]) => queryParams.append(key, String(value)));
+
+    // Add interest_groups as comma-separated string
+    if (params.interest_groups && params.interest_groups.length > 0) {
+      queryParams.append('interest_groups', params.interest_groups.join(','));
+    }
 
     const response = await fetch(`${baseUrl}/streamgraph/activities?${queryParams}`);
     if (!response.ok) {
@@ -203,6 +208,17 @@ export const api = {
     const response = await fetch(`${baseUrl}/buildings/polygons`);
     if (!response.ok) {
       throw new Error(`Failed to fetch building polygons: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch all unique interest groups
+   */
+  async fetchInterestGroups(): Promise<{ interest_groups: string[] }> {
+    const response = await fetch(`${baseUrl}/utils/interest-groups`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch interest groups: ${response.statusText}`);
     }
     return response.json();
   },

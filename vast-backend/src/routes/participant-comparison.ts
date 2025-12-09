@@ -64,7 +64,7 @@ router.get('/compare', async (req: Request, res: Response): Promise<void> => {
 
     // Get location timeline data for animation
     const timelineQuery = `
-      SELECT 
+      SELECT
         participant_id,
         timestamp,
         ST_X(current_location::geometry) as x,
@@ -79,6 +79,31 @@ router.get('/compare', async (req: Request, res: Response): Promise<void> => {
     `;
 
     const timelineResult = await pool.query(timelineQuery, params);
+
+    // Calculate Manhattan distance for each participant using SQL
+    const distanceQuery = `
+      WITH ordered_locations AS (
+        SELECT
+          participant_id,
+          ST_X(current_location::geometry) as x,
+          ST_Y(current_location::geometry) as y,
+          LAG(ST_X(current_location::geometry)) OVER (PARTITION BY participant_id ORDER BY timestamp) as prev_x,
+          LAG(ST_Y(current_location::geometry)) OVER (PARTITION BY participant_id ORDER BY timestamp) as prev_y
+        FROM participant_status_logs
+        WHERE participant_id IN ($1, $2)
+          AND current_location IS NOT NULL
+          ${start ? 'AND timestamp >= $3' : ''}
+          ${end && start ? 'AND timestamp <= $4' : end ? 'AND timestamp <= $3' : ''}
+      )
+      SELECT
+        participant_id,
+        SUM(ABS(x - prev_x) + ABS(y - prev_y)) as total_distance
+      FROM ordered_locations
+      WHERE prev_x IS NOT NULL AND prev_y IS NOT NULL
+      GROUP BY participant_id
+    `;
+
+    const distanceResult = await pool.query(distanceQuery, params);
 
     // Structure the response
     const participant1Data = participantsResult.rows.find(
@@ -115,17 +140,30 @@ router.get('/compare', async (req: Request, res: Response): Promise<void> => {
       });
     });
 
+    // Extract distance data by participant
+    const distanceByParticipant: { [key: string]: number } = {
+      [participant1 as string]: 0,
+      [participant2 as string]: 0
+    };
+
+    distanceResult.rows.forEach((row: any) => {
+      const pid = String(row.participant_id);
+      distanceByParticipant[pid] = parseFloat(row.total_distance) || 0;
+    });
+
     const response = {
       participants: {
         [participant1 as string]: {
           info: participant1Data,
           activityDistribution: activityByParticipant[participant1 as string],
-          timeline: timelineByParticipant[participant1 as string]
+          timeline: timelineByParticipant[participant1 as string],
+          totalDistance: distanceByParticipant[participant1 as string]
         },
         [participant2 as string]: {
           info: participant2Data,
           activityDistribution: activityByParticipant[participant2 as string],
-          timeline: timelineByParticipant[participant2 as string]
+          timeline: timelineByParticipant[participant2 as string],
+          totalDistance: distanceByParticipant[participant2 as string]
         }
       },
       timeRange: {

@@ -9,34 +9,51 @@ router.get('/activities', async (req: Request, res: Response) => {
     const {
       start,
       end,
-      time_bucket_minutes = 60
+      time_bucket_minutes = 60,
+      interest_groups
     } = req.query;
 
     console.log('Streamgraph /activities params:', req.query);
 
     const timeBucket = Number(time_bucket_minutes);
 
+    // Parse interest_groups parameter (can be comma-separated or array)
+    let interestGroupsArray: string[] | null = null;
+    if (interest_groups) {
+      if (Array.isArray(interest_groups)) {
+        interestGroupsArray = interest_groups as string[];
+      } else if (typeof interest_groups === 'string') {
+        interestGroupsArray = interest_groups.split(',').map(g => g.trim()).filter(g => g.length > 0);
+      }
+    }
+
     let query = `
       WITH time_series AS (
         SELECT
-          date_trunc('hour', timestamp) +
-          INTERVAL '${timeBucket} minutes' * FLOOR(EXTRACT(EPOCH FROM timestamp - date_trunc('hour', timestamp)) / 60 / ${timeBucket}) as time_bucket,
-          current_mode as activity,
-          participant_id
-        FROM participant_status_logs
-        WHERE current_mode IS NOT NULL
+          to_timestamp(FLOOR(EXTRACT(EPOCH FROM psl.timestamp) / (${timeBucket} * 60)) * (${timeBucket} * 60)) as time_bucket,
+          psl.current_mode as activity,
+          psl.participant_id
+        FROM participant_status_logs psl
+        INNER JOIN participants p ON psl.participant_id = p.participant_id
+        WHERE psl.current_mode IS NOT NULL
     `;
 
     const params: any[] = [];
 
     if (start) {
       params.push(start);
-      query += ` AND timestamp >= $${params.length}`;
+      query += ` AND psl.timestamp >= $${params.length}`;
     }
 
     if (end) {
       params.push(end);
-      query += ` AND timestamp <= $${params.length}`;
+      query += ` AND psl.timestamp <= $${params.length}`;
+    }
+
+    // Add interest group filtering if specified
+    if (interestGroupsArray && interestGroupsArray.length > 0) {
+      params.push(interestGroupsArray);
+      query += ` AND p.interest_group = ANY($${params.length})`;
     }
 
     query += `

@@ -8,6 +8,7 @@ export interface StreamgraphDataParams {
   endDate: string;
   endTime: string;
   timeBucketMinutes: number;
+  interestGroups?: string[];
 }
 
 export interface UseStreamgraphDataReturn {
@@ -54,6 +55,7 @@ export function useStreamgraphData(): UseStreamgraphDataReturn {
         start: `${params.startDate}T${params.startTime}:00Z`,
         end: `${params.endDate}T${params.endTime}:00Z`,
         time_bucket_minutes: params.timeBucketMinutes,
+        interest_groups: params.interestGroups,
       });
 
       setStreamgraphData(response.data);

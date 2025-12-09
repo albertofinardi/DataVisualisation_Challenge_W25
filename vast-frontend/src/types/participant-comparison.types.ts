@@ -23,6 +23,7 @@ export interface ParticipantData {
   info: ParticipantInfo;
   activityDistribution: ActivityDistribution;
   timeline: TimelinePoint[];
+  totalDistance: number;
 }
 
 export interface ParticipantComparisonResponse {

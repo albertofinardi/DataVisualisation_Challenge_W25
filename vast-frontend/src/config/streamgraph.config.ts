@@ -64,6 +64,20 @@ export const STREAMGRAPH_CONFIG = {
     endDate: '2022-03-22',
     endTime: '03:00',
   },
+
+  // Available interest groups for filtering
+  interestGroups: [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+  ],
 };
 
 // Helper function to get color for an activity

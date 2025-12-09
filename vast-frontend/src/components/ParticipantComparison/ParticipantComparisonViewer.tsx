@@ -99,15 +99,15 @@ export function ParticipantComparisonViewer() {
   const currentTimestamp = getCurrentTimestamp();
 
   return (
-    <div className="min-h-screen bg-background p-6 overflow-x-auto">
-      <div className="min-w-min space-y-6" style={{ width: 'fit-content', minWidth: '100%' }}>
+    <div className="min-h-screen bg-background p-4 lg:p-6">
+      <div className="max-w-[1920px] mx-auto space-y-4 lg:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
+            <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">
               Participant Comparison
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm lg:text-base text-muted-foreground">
               Compare daily routines and travel patterns of two participants
             </p>
           </div>
@@ -314,21 +314,22 @@ export function ParticipantComparisonViewer() {
               </CardContent>
             </Card>
 
-            {/* Main Visualization: 3-column layout */}
-            <div className="grid grid-cols-12 gap-4">
+            {/* Main Visualization: Responsive layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6">
               {/* Left Panel - Participant 1 Info */}
-              <div className="col-span-2">
+              <div className="xl:col-span-3">
                 <ParticipantInfoPanel
                   participantId={participant1}
                   info={p1Data.info}
                   activityDistribution={p1Data.activityDistribution}
+                  totalDistance={p1Data.totalDistance}
                 />
               </div>
 
               {/* Center - Map */}
-              <div className="col-span-8">
-                <Card>
-                  <CardContent className="pt-6">
+              <div className="xl:col-span-6">
+                <Card className="h-full flex flex-col">
+                  <CardContent className="pt-6 flex-1 flex items-center justify-center overflow-hidden">
                     <RouteMap
                       participant1Timeline={p1Data.timeline}
                       participant2Timeline={p2Data.timeline}
@@ -342,11 +343,12 @@ export function ParticipantComparisonViewer() {
               </div>
 
               {/* Right Panel - Participant 2 Info */}
-              <div className="col-span-2">
+              <div className="xl:col-span-3">
                 <ParticipantInfoPanel
                   participantId={participant2}
                   info={p2Data.info}
                   activityDistribution={p2Data.activityDistribution}
+                  totalDistance={p2Data.totalDistance}
                 />
               </div>
             </div>

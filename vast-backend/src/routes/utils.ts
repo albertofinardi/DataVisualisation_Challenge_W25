@@ -159,4 +159,42 @@ router.get('/participants', async (_req: Request, res: Response) => {
   }
 });
 
+/**
+ * Get all unique interest groups
+ *
+ * @route GET /api/utils/interest-groups
+ *
+ * @returns {Object} Array of all unique interest groups
+ *
+ * @example
+ * // GET /api/utils/interest-groups
+ * {
+ *   "interest_groups": ["A", "B", "C", ...]
+ * }
+ *
+ * @description
+ * Returns all unique interest groups from the participants table.
+ * Useful for filtering visualizations by participant interest groups.
+ */
+router.get('/interest-groups', async (_req: Request, res: Response) => {
+  try {
+    const query = `
+      SELECT DISTINCT interest_group
+      FROM participants
+      WHERE interest_group IS NOT NULL
+      ORDER BY interest_group ASC
+    `;
+
+    const result = await pool.query(query);
+
+    const interestGroups = result.rows.map((row: any) => row.interest_group);
+
+    return res.json({
+      interest_groups: interestGroups
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export { router };
