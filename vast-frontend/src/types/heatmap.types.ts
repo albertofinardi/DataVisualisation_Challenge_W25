@@ -8,6 +8,7 @@ export interface LocationDataPoint {
   count: string;
   center_longitude: number;
   center_latitude: number;
+  interest_group?: string;
 }
 
 export interface TemporalHeatmapData {
