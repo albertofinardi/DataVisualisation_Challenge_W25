@@ -7,6 +7,7 @@ import type { TemporalHeatmapData, StaticHeatmapData, LocationDetails, Bounds } 
 import type { StreamgraphDataResponse } from '../types/streamgraph.types';
 import type { ActivityTimelineDataResponse, ParticipantTimelineDataResponse } from '../types/activity-calendar.types';
 import type { ParticipantComparisonResponse } from '../types/participant-comparison.types';
+import type { BuildingPolygonData } from '../types/buildings.types';
 
 const { baseUrl } = MAP_CONFIG.api;
 
@@ -191,6 +192,17 @@ export const api = {
     const response = await fetch(`${baseUrl}/participant-comparison/compare?${queryParams}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch participant comparison data: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch building polygon data with type information
+   */
+  async fetchBuildingPolygons(): Promise<BuildingPolygonData[]> {
+    const response = await fetch(`${baseUrl}/buildings/polygons`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch building polygons: ${response.statusText}`);
     }
     return response.json();
   },

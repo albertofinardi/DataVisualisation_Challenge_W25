@@ -5,6 +5,7 @@ import { router as utilsRouter } from './utils';
 import { router as streamgraphRouter } from './streamgraph';
 import { router as activityCalendarRouter } from './activity-calendar';
 import participantComparisonRouter from './participant-comparison';
+import { router as buildingsRouter } from './buildings';
 import { Router } from 'express';
 
 const router = Router();
@@ -15,6 +16,7 @@ router.use('/heatmap', heatmapRouter);
 router.use('/streamgraph', streamgraphRouter);
 router.use('/activity-calendar', activityCalendarRouter);
 router.use('/participant-comparison', participantComparisonRouter);
+router.use('/buildings', buildingsRouter);
 router.use('/utils', utilsRouter);
 
 export { router };
