@@ -9,11 +9,13 @@ export interface HeatmapDataParams {
   endTime: string;
   cellSize: number;
   timeBucketMinutes: number;
+  interestGroups?: string[];
 }
 
 export interface UseHeatmapDataReturn {
   heatmapData: TemporalHeatmapData;
   globalMaxCount: number;
+  groupMaxCounts: Record<string, number>;
   timestamps: string[];
   loading: boolean;
   error: string | null;
@@ -31,6 +33,7 @@ export interface UseHeatmapDataReturn {
 export function useHeatmapData(): UseHeatmapDataReturn {
   const [heatmapData, setHeatmapData] = useState<TemporalHeatmapData>({});
   const [globalMaxCount, setGlobalMaxCount] = useState<number>(1);
+  const [groupMaxCounts, setGroupMaxCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCell, setSelectedCell] = useState<LocationDetails | null>(null);
@@ -51,10 +54,12 @@ export function useHeatmapData(): UseHeatmapDataReturn {
         end: `${params.endDate}T${params.endTime}:00Z`,
         cell_size: params.cellSize,
         time_bucket_minutes: params.timeBucketMinutes,
+        interest_groups: params.interestGroups,
       });
 
       setHeatmapData(response.data);
       setGlobalMaxCount(response.globalMaxCount);
+      setGroupMaxCounts(response.groupMaxCounts || {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -105,6 +110,7 @@ export function useHeatmapData(): UseHeatmapDataReturn {
   return {
     heatmapData,
     globalMaxCount,
+    groupMaxCounts,
     timestamps,
     loading,
     error,

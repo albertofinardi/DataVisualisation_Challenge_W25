@@ -305,3 +305,77 @@ export function interpolateColors(
     interpolator(i / (steps - 1))
   );
 }
+
+/**
+ * Color schemes for interest groups (A-J)
+ * Each group gets a distinct color with light/dark theme variants
+ */
+export const INTEREST_GROUP_COLORS: Record<string, { light: string[]; dark: string[] }> = {
+  A: {
+    light: ['#fef4f0', '#fcd4c3', '#f7b99b', '#ef8354', '#e06d3f', '#d55a2f', '#c85a2e', '#b8491f', '#a33c18', '#8e3014'],
+    dark: ['#3d2a22', '#662f1a', '#9d4025', '#c85a2e', '#ef8354', '#ff9d7a', '#ffaa80', '#ffb893', '#ffc5a6', '#ffd2b9'],
+  },
+  B: {
+    light: ['#f0f4fe', '#c3d7fc', '#9bbef7', '#5493ef', '#3f7ae0', '#2f66d5', '#2e59c8', '#1f47b8', '#1838a3', '#14308e'],
+    dark: ['#222a3d', '#1a2f66', '#25409d', '#2e59c8', '#5493ef', '#7aa8ff', '#80b3ff', '#93c0ff', '#a6cbff', '#b9d6ff'],
+  },
+  C: {
+    light: ['#f4f0fe', '#d7c3fc', '#be9bf7', '#9354ef', '#7a3fe0', '#662fd5', '#592ec8', '#471fb8', '#3818a3', '#30148e'],
+    dark: ['#2a223d', '#2f1a66', '#40259d', '#592ec8', '#9354ef', '#a87aff', '#b380ff', '#c093ff', '#cba6ff', '#d6b9ff'],
+  },
+  D: {
+    light: ['#fef0f4', '#fcc3d7', '#f79bbe', '#ef5493', '#e03f7a', '#d52f66', '#c82e59', '#b81f47', '#a31838', '#8e1430'],
+    dark: ['#3d222a', '#661a2f', '#9d2540', '#c82e59', '#ef5493', '#ff7aa8', '#ff80b3', '#ff93c0', '#ffa6cb', '#ffb9d6'],
+  },
+  E: {
+    light: ['#f0fef4', '#c3fcd7', '#9bf7be', '#54ef93', '#3fe07a', '#2fd566', '#2ec859', '#1fb847', '#18a338', '#148e30'],
+    dark: ['#223d2a', '#1a661f', '#259d40', '#2ec859', '#54ef93', '#7affa8', '#80ffb3', '#93ffc0', '#a6ffcb', '#b9ffd6'],
+  },
+  F: {
+    light: ['#fefef0', '#fcfcc3', '#f7f79b', '#efef54', '#e0e03f', '#d5d52f', '#c8c82e', '#b8b81f', '#a3a318', '#8e8e14'],
+    dark: ['#3d3d22', '#66661a', '#9d9d25', '#c8c82e', '#efef54', '#ffff7a', '#ffff80', '#ffff93', '#ffffa6', '#ffffb9'],
+  },
+  G: {
+    light: ['#fef4fe', '#fcc3fc', '#f79bf7', '#ef54ef', '#e03fe0', '#d52fd5', '#c82ec8', '#b81fb8', '#a318a3', '#8e148e'],
+    dark: ['#3d223d', '#661a66', '#9d259d', '#c82ec8', '#ef54ef', '#ff7aff', '#ff80ff', '#ff93ff', '#ffa6ff', '#ffb9ff'],
+  },
+  H: {
+    light: ['#f0fefe', '#c3fcfc', '#9bf7f7', '#54efef', '#3fe0e0', '#2fd5d5', '#2ec8c8', '#1fb8b8', '#18a3a3', '#148e8e'],
+    dark: ['#223d3d', '#1a6666', '#259d9d', '#2ec8c8', '#54efef', '#7affff', '#80ffff', '#93ffff', '#a6ffff', '#b9ffff'],
+  },
+  I: {
+    light: ['#fffef0', '#fffcc3', '#fff79b', '#ffef54', '#ffe03f', '#ffd52f', '#ffc82e', '#ffb81f', '#ffa318', '#ff8e14'],
+    dark: ['#3d3d22', '#66661a', '#9d9d25', '#ffc82e', '#ffef54', '#ffff7a', '#ffff80', '#ffff93', '#ffffa6', '#ffffb9'],
+  },
+  J: {
+    light: ['#fff0f0', '#ffc3c3', '#ff9b9b', '#ff5454', '#ff3f3f', '#ff2f2f', '#ff2e2e', '#ff1f1f', '#ff1818', '#ff1414'],
+    dark: ['#3d2222', '#661a1a', '#9d2525', '#ff2e2e', '#ff5454', '#ff7a7a', '#ff8080', '#ff9393', '#ffa6a6', '#ffb9b9'],
+  },
+};
+
+/**
+ * Gets the color gradient for a specific interest group
+ */
+export function getInterestGroupColors(
+  group: string,
+  theme?: Theme
+): string[] {
+  const currentTheme = theme || getCurrentTheme();
+  return INTEREST_GROUP_COLORS[group]?.[currentTheme] || INTEREST_GROUP_COLORS.A[currentTheme];
+}
+
+/**
+ * Creates a color scale for a specific interest group
+ */
+export function createInterestGroupScale(
+  domain: [number, number],
+  group: string,
+  theme?: Theme
+): ScaleQuantize<string, never> {
+  const currentTheme = theme || getCurrentTheme();
+  const colors = getInterestGroupColors(group, currentTheme);
+
+  return scaleQuantize<string>()
+    .domain(domain)
+    .range(colors);
+}

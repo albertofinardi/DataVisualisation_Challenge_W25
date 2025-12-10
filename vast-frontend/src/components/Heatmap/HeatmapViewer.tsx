@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Play,
   Pause,
@@ -17,8 +17,12 @@ import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useHeatmapData } from "@/hooks/useHeatmapData";
 import { usePlayback } from "@/hooks/usePlayback";
+import { STREAMGRAPH_CONFIG } from "@/config/streamgraph.config";
+import { api } from "@/services/api";
+import type { BuildingPolygonData } from "@/types/buildings.types";
 
 export function HeatmapViewer() {
   const [showDataConfig, setShowDataConfig] = useState(true);
@@ -29,10 +33,15 @@ export function HeatmapViewer() {
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState("2022-03-22");
   const [endTime, setEndTime] = useState("00:00");
+  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>([]);
+  const [showBuildings, setShowBuildings] = useState(false);
+  const [buildingData, setBuildingData] = useState<BuildingPolygonData[]>([]);
+  const [useGroupColors, setUseGroupColors] = useState(false);
 
   const {
     heatmapData,
     globalMaxCount,
+    groupMaxCounts,
     timestamps,
     loading,
     error,
@@ -53,6 +62,19 @@ export function HeatmapViewer() {
     goToFrame,
   } = usePlayback(timestamps.length, 1000); // 1000ms base interval = 1 second per frame at 1x speed
 
+  // Load building data on mount
+  useEffect(() => {
+    const loadBuildings = async () => {
+      try {
+        const buildings = await api.fetchBuildingPolygons();
+        setBuildingData(buildings);
+      } catch (err) {
+        console.error('Failed to load building data:', err);
+      }
+    };
+    loadBuildings();
+  }, []);
+
   const currentTimestamp = timestamps[currentTimeIndex];
   const currentData = currentTimestamp ? heatmapData[currentTimestamp] : [];
 
@@ -65,7 +87,24 @@ export function HeatmapViewer() {
       endTime,
       cellSize,
       timeBucketMinutes,
+      interestGroups: selectedInterestGroups.length > 0 ? selectedInterestGroups : undefined,
     });
+  };
+
+  const handleInterestGroupToggle = (group: string) => {
+    setSelectedInterestGroups((prev) =>
+      prev.includes(group)
+        ? prev.filter((g) => g !== group)
+        : [...prev, group]
+    );
+  };
+
+  const handleSelectAllInterestGroups = () => {
+    if (selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length) {
+      setSelectedInterestGroups([]);
+    } else {
+      setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
+    }
   };
 
   const handleCellClick = (cell: { grid_x: number; grid_y: number }) => {
@@ -115,22 +154,65 @@ export function HeatmapViewer() {
           onOpenChange={setShowDataConfig}
           className="border-coral/20"
         >
-          <SettingsPanel
-            startDate={startDate}
-            setStartDate={setStartDate}
-            startTime={startTime}
-            setStartTime={setStartTime}
-            endDate={endDate}
-            setEndDate={setEndDate}
-            endTime={endTime}
-            setEndTime={setEndTime}
-            cellSize={cellSize}
-            setCellSize={setCellSize}
-            timeBucketMinutes={timeBucketMinutes}
-            setTimeBucketMinutes={setTimeBucketMinutes}
-            handleApplySettings={handleApplySettings}
-            handleCancel={() => setShowDataConfig(false)}
-          />
+          <div className="space-y-6">
+            <SettingsPanel
+              startDate={startDate}
+              setStartDate={setStartDate}
+              startTime={startTime}
+              setStartTime={setStartTime}
+              endDate={endDate}
+              setEndDate={setEndDate}
+              endTime={endTime}
+              setEndTime={setEndTime}
+              cellSize={cellSize}
+              setCellSize={setCellSize}
+              timeBucketMinutes={timeBucketMinutes}
+              setTimeBucketMinutes={setTimeBucketMinutes}
+              handleApplySettings={handleApplySettings}
+              handleCancel={() => setShowDataConfig(false)}
+            />
+
+            {/* Interest Groups Filter */}
+            <div className="border-t pt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">
+                  Filter by Interest Groups
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSelectAllInterestGroups}
+                  className="h-8 text-xs"
+                >
+                  {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
+                    ? 'Deselect All'
+                    : 'Select All'}
+                </Button>
+              </div>
+              <div className="grid grid-cols-5 gap-3 p-4 border rounded-lg bg-muted/30">
+                {STREAMGRAPH_CONFIG.interestGroups.map((group) => (
+                  <div key={group} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`interest-${group}`}
+                      checked={selectedInterestGroups.includes(group)}
+                      onCheckedChange={() => handleInterestGroupToggle(group)}
+                    />
+                    <label
+                      htmlFor={`interest-${group}`}
+                      className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Group {group}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {selectedInterestGroups.length === 0
+                  ? 'All interest groups will be included'
+                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''} with distinct color scales`}
+              </p>
+            </div>
+          </div>
         </CollapsibleCard>
 
         {timestamps.length > 0 && (
@@ -194,40 +276,79 @@ export function HeatmapViewer() {
                   </div>
 
                   {/* Visualization Settings */}
-                  <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Playback Speed */}
-                    <div className="space-y-2">
-                      <Label className="flex items-center justify-between text-sm font-medium">
-                        <span>Playback Speed</span>
-                        <span className="text-accent font-semibold">
-                          {playbackSpeed.toFixed(1)}x
-                        </span>
-                      </Label>
-                      <Slider
-                        value={[playbackSpeed]}
-                        onValueChange={(v) => setPlaybackSpeed(v[0])}
-                        min={0.1}
-                        max={5}
-                        step={0.1}
-                        className="w-full"
-                      />
+                  <div className="border-t pt-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Playback Speed */}
+                      <div className="space-y-2">
+                        <Label className="flex items-center justify-between text-sm font-medium">
+                          <span>Playback Speed</span>
+                          <span className="text-accent font-semibold">
+                            {playbackSpeed.toFixed(1)}x
+                          </span>
+                        </Label>
+                        <Slider
+                          value={[playbackSpeed]}
+                          onValueChange={(v) => setPlaybackSpeed(v[0])}
+                          min={0.1}
+                          max={5}
+                          step={0.1}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Constant Scale Toggle */}
+                      <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">
+                        <div className="space-y-0.5">
+                          <Label className="text-sm font-medium">
+                            Constant Scale
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Use consistent color scale across all frames
+                          </p>
+                        </div>
+                        <Switch
+                          checked={useConstantScale}
+                          onCheckedChange={setUseConstantScale}
+                        />
+                      </div>
+
+                      {/* Show Buildings Toggle */}
+                      <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">
+                        <div className="space-y-0.5">
+                          <Label className="text-sm font-medium">
+                            Show Buildings
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Overlay building polygons on the map
+                          </p>
+                        </div>
+                        <Switch
+                          checked={showBuildings}
+                          onCheckedChange={setShowBuildings}
+                        />
+                      </div>
                     </div>
 
-                    {/* Constant Scale Toggle */}
-                    <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">
-                      <div className="space-y-0.5">
-                        <Label className="text-sm font-medium">
-                          Constant Scale
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Use consistent color scale across all frames
-                        </p>
+                    {/* Group Color Mode Toggle - Only show when groups are selected */}
+                    {selectedInterestGroups.length > 0 && (
+                      <div className="flex items-center justify-between py-2 px-4 bg-accent/10 rounded-lg border border-accent/30">
+                        <div className="space-y-0.5">
+                          <Label className="text-sm font-medium">
+                            Separate Group Colors
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {timestamps.length === 0
+                              ? 'Apply settings first to load filtered data'
+                              : 'Show each interest group with distinct color scales'}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={useGroupColors}
+                          onCheckedChange={setUseGroupColors}
+                          disabled={timestamps.length === 0}
+                        />
                       </div>
-                      <Switch
-                        checked={useConstantScale}
-                        onCheckedChange={setUseConstantScale}
-                      />
-                    </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -241,6 +362,11 @@ export function HeatmapViewer() {
                 onCellClick={handleCellClick}
                 selectedCell={selectedCell}
                 maxCount={useConstantScale ? globalMaxCount : undefined}
+                groupMaxCounts={groupMaxCounts}
+                selectedInterestGroups={selectedInterestGroups}
+                buildingData={buildingData}
+                showBuildings={showBuildings}
+                useGroupColors={useGroupColors}
               />
             </div>
 

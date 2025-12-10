@@ -17,6 +17,7 @@ export interface HeatmapParams {
   cell_size?: number;
   time_bucket_minutes?: number;
   include_temporal?: boolean;
+  interest_groups?: string[];
 }
 
 export interface LocationDetailsParams {
@@ -31,13 +32,20 @@ export const api = {
   /**
    * Fetch temporal heatmap data (grouped by time)
    */
-  async fetchTemporalHeatmap(params: HeatmapParams): Promise<{ data: TemporalHeatmapData, globalMaxCount: number }> {
-    const queryParams = new URLSearchParams({
-      include_temporal: 'true',
-      ...Object.fromEntries(
-        Object.entries(params).map(([key, value]) => [key, String(value)])
-      ),
-    });
+  async fetchTemporalHeatmap(params: HeatmapParams): Promise<{ data: TemporalHeatmapData, globalMaxCount: number, groupMaxCounts?: Record<string, number> }> {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append('include_temporal', 'true');
+
+    // Add simple params
+    Object.entries(params)
+      .filter(([key, value]) => value !== undefined && key !== 'interest_groups')
+      .forEach(([key, value]) => queryParams.append(key, String(value)));
+
+    // Add interest_groups as comma-separated string
+    if (params.interest_groups && params.interest_groups.length > 0) {
+      queryParams.append('interest_groups', params.interest_groups.join(','));
+    }
 
     const response = await fetch(`${baseUrl}/heatmap/locations?${queryParams}`);
     if (!response.ok) {

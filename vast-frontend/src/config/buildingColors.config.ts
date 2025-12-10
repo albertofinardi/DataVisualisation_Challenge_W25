@@ -45,6 +45,10 @@ export const BUILDING_INTERACTION_COLORS = {
  * Get color for a building type based on theme
  */
 export const getBuildingColor = (type: BuildingType, theme: 'light' | 'dark' = 'light'): string => {
+  // Fallback to a neutral gray if type is undefined or not found
+  if (!type || !BUILDING_COLORS[type]) {
+    return theme === 'dark' ? '#6b7280' : '#9ca3af';
+  }
   return BUILDING_COLORS[type][theme];
 };
 
