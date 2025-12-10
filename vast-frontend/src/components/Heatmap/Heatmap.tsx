@@ -155,7 +155,7 @@ export function Heatmap({
           return d3.line()(points) + 'Z';
         })
         .attr('fill', (d) => getBuildingColor(d.building_type, theme))
-        .attr('opacity', 0.8)
+        .attr('opacity', MAP_CONFIG.heatmap.buildingOpacity)
         .attr('stroke', (d) => getBuildingColor(d.building_type, theme))
         .attr('stroke-width', 1)
         .style('pointer-events', 'none');
