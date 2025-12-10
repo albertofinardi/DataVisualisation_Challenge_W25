@@ -276,8 +276,7 @@ router.get('/locations', async (req: Request, res: Response) => {
     // Add time bucket column if requested
     if (includeTemporal) {
       query += `
-          date_trunc('hour', timestamp) +
-          INTERVAL '${timeBucket} minutes' * FLOOR(EXTRACT(EPOCH FROM timestamp - date_trunc('hour', timestamp)) / 60 / ${timeBucket}) as time_bucket,
+          to_timestamp(FLOOR(EXTRACT(EPOCH FROM timestamp) / (${timeBucket} * 60)) * (${timeBucket} * 60)) as time_bucket,
       `;
     }
 
@@ -438,8 +437,7 @@ router.get('/locations/details', async (req: Request, res: Response) => {
 
     if (time_bucket) {
       query += `,
-          date_trunc('hour', timestamp) +
-          INTERVAL '${timeBucket} minutes' * FLOOR(EXTRACT(EPOCH FROM timestamp - date_trunc('hour', timestamp)) / 60 / ${timeBucket}) as time_bucket
+          to_timestamp(FLOOR(EXTRACT(EPOCH FROM timestamp) / (${timeBucket} * 60)) * (${timeBucket} * 60)) as time_bucket
       `;
     }
 

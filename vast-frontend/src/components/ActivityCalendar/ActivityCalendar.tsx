@@ -9,13 +9,13 @@ interface ActivityCalendarProps {
   height?: number;
 }
 
-const CELL_SIZE = 40;
+const CELL_SIZE = 20;
 const MARGIN = { top: 80, right: 200, bottom: 60, left: 80 };
 
 export function ActivityCalendar({
   data,
   width = 1400,
-  height = 800,
+  height,
 }: ActivityCalendarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,11 +82,14 @@ export function ActivityCalendar({
     const numDays = dates.length;
     const numHours = 24;
     const innerWidth = calendarWidth - MARGIN.left - MARGIN.right;
-    const innerHeight = height - MARGIN.top - MARGIN.bottom;
 
-    // Calculate cell size to fit within bounds
-    const cellWidth = Math.min(CELL_SIZE, innerWidth / numHours);
-    const cellHeight = Math.min(CELL_SIZE, innerHeight / numDays);
+    // Calculate cell size based on width constraint for hours
+    const cellWidth = innerWidth / numHours;
+
+    // Use provided height or calculate proportional height based on number of days
+    const cellHeight = height
+      ? Math.min(CELL_SIZE, (height - MARGIN.top - MARGIN.bottom) / numDays)
+      : CELL_SIZE;
 
     const actualWidth = cellWidth * numHours + MARGIN.left + MARGIN.right;
     const actualHeight = cellHeight * numDays + MARGIN.top + MARGIN.bottom;

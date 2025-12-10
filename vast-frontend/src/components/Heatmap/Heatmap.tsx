@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { MAP_CONFIG } from '@/config/map.config';
 import type { LocationDataPoint, LocationDetails } from '@/types/heatmap.types';
 import type { BuildingPolygonData } from '@/types/buildings.types';
-import { createQuantizeScale, getHoverColor, getSelectedColor, createInterestGroupScale, getCurrentTheme } from '@/services/colorScale';
+import { createQuantizeScale, getHoverColor, getSelectedColor, createInterestGroupScale } from '@/services/colorScale';
 import type { ColorScheme } from '@/services/colorScale';
 import { getBuildingColor } from '@/config/buildingColors.config';
 import BaseMapImage from '@/assets/BaseMap.png';
@@ -58,9 +58,6 @@ export function Heatmap({
       .domain([bounds.maxLatitude, bounds.minLatitude])
       .range([padding.top, height - padding.bottom]);
 
-    // Get current theme
-    const theme = getCurrentTheme();
-
     // Determine if we're using interest group coloring
     // We can use group colors if the toggle is on AND data has interest_group field
     const hasInterestGroupData = data.length > 0 && data.some(d => d.interest_group !== undefined && d.interest_group !== null);
@@ -109,11 +106,11 @@ export function Heatmap({
       Object.keys(dataByGroup).forEach((group) => {
         // Use the group-specific max count if available, otherwise fall back to overall max
         const groupMax = groupMaxCounts[group] || maxCount || scaleMaxCount;
-        interestGroupScales[group] = createInterestGroupScale([0, groupMax], group, theme);
+        interestGroupScales[group] = createInterestGroupScale([0, groupMax], group);
       });
     }
 
-    // Get theme colors
+    // Get colors
     const hoverColor = getHoverColor(colorScheme);
     const selectedColor = getSelectedColor(colorScheme);
 
@@ -154,9 +151,9 @@ export function Heatmap({
           const points = d.polygon.map(([x, y]) => [xScale(x), yScale(y)] as [number, number]);
           return d3.line()(points) + 'Z';
         })
-        .attr('fill', (d) => getBuildingColor(d.building_type, theme))
+        .attr('fill', (d) => getBuildingColor(d.building_type))
         .attr('opacity', MAP_CONFIG.heatmap.buildingOpacity)
-        .attr('stroke', (d) => getBuildingColor(d.building_type, theme))
+        .attr('stroke', (d) => getBuildingColor(d.building_type))
         .attr('stroke-width', 1)
         .style('pointer-events', 'none');
     }
@@ -195,7 +192,7 @@ export function Heatmap({
           .attr('cy', (d) => yScale(d.grid_y + cellSize) + cellPixelHeight / 2)
           .attr('r', Math.max(cellPixelWidth, cellPixelHeight) * 0.8)
           .attr('fill', (d) => groupScale(parseInt(d.count)))
-          .attr('opacity', 1);
+          .attr('opacity', MAP_CONFIG.heatmap.opacity);
       });
     } else {
       // Standard single-color heatmap (aggregated or filtered data)
@@ -389,11 +386,11 @@ export function Heatmap({
     // Add building legend if buildings are shown
     if (showBuildings && buildingData.length > 0) {
       const buildingTypes: Array<{ type: string; color: string }> = [
-        { type: 'Pub', color: getBuildingColor('Pub', theme) },
-        { type: 'Restaurant', color: getBuildingColor('Restaurant', theme) },
-        { type: 'Apartment', color: getBuildingColor('Apartment', theme) },
-        { type: 'Employer', color: getBuildingColor('Employer', theme) },
-        { type: 'School', color: getBuildingColor('School', theme) },
+        { type: 'Pub', color: getBuildingColor('Pub') },
+        { type: 'Restaurant', color: getBuildingColor('Restaurant') },
+        { type: 'Apartment', color: getBuildingColor('Apartment') },
+        { type: 'Employer', color: getBuildingColor('Employer') },
+        { type: 'School', color: getBuildingColor('School') },
       ];
 
       const buildingLegendX = padding.left + 20;
