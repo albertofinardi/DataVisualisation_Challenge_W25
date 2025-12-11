@@ -84,9 +84,9 @@ export function BuildingPolygons({ data, typeFilters, showGrid = false, gridSize
         const points = d.polygon.map(([x, y]) => [xScale(x), yScale(y)] as [number, number]);
         return d3.line()(points) + 'Z'; // Close the path
       })
-      .attr('fill', (d) => getBuildingColor(d.building_type, theme))
+      .attr('fill', (d) => getBuildingColor(d.building_type))
       .attr('opacity', BUILDING_OPACITY.default)
-      .attr('stroke', (d) => getBuildingColor(d.building_type, theme))
+      .attr('stroke', (d) => getBuildingColor(d.building_type))
       .attr('stroke-width', 1)
       .on('mouseenter', function (event, d) {
         // Highlight on hover

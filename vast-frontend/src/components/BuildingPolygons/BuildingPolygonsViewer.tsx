@@ -88,7 +88,7 @@ export function BuildingPolygonsViewer() {
                 <h2 className="text-lg font-semibold mb-4">Building Type Filters</h2>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {(Object.keys(typeFilters) as BuildingType[]).map((type) => {
-                    const color = BUILDING_COLORS[type].light;
+                    const color = BUILDING_COLORS[type];
                     const count = data.filter((b) => b.building_type === type).length;
                     return (
                       <div key={type} className="flex items-center space-x-2">
