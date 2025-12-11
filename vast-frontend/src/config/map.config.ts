@@ -67,6 +67,6 @@ export const MAP_CONFIG = {
 
   // API settings
   api: {
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'http://localhost:3001/api',
   },
 } as const;

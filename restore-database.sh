@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Restore PostgreSQL database from dump file
-set -e
 
 EXPORT_DIR="./db-exports"
 CONTAINER_NAME="vast-postgres"
