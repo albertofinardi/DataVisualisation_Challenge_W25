@@ -48,6 +48,7 @@
 % ==============================================================================
 
 \begin{frame}{The Problem}
+    \vspace{15pt}
     \begin{columns}
         \begin{column}{0.5\textwidth}
             \textbf{Urban Planning Challenge}
@@ -57,13 +58,7 @@
                 \item Need data-driven insights
             \end{itemize}
         \end{column}
-
-
-
-
-
         \begin{column}{0.5\textwidth}
-
         \textbf{Challenge Scope}
             \begin{itemize}
                 \item Map of urban area
@@ -71,27 +66,30 @@
                 \item Diverse activity patterns
             \end{itemize}
         \end{column}
-
     \end{columns}
-
-    \vfill
+    \vspace{15pt}
     \begin{center}
         \textbf{Our Mission}
-        
+        \begin{columns}
+        \begin{column}{0.5\textwidth}
         \begin{itemize}
             \item Analyze patterns of daily life
             \item Identify city characteristics
+        \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
             \item Support infrastructure planning
             \item Improve quality of life
-        \end{itemize}
+            \end{itemize}
+        \end{column}
+    \end{columns}
     \end{center}
     \vspace{0.5cm}
 \end{frame}
 
 \begin{frame}{The Dataset}
     \textbf{Massive Urban Activity Data}
-
-    \vspace{10pt}
     \begin{itemize}
         \item \textbf{Duration:} 15 months (March 2022 - May 2023)
         \item \textbf{Participants:} $\sim$1,000 volunteer residents
@@ -130,9 +128,7 @@
 \section{Our Solution}
 % ==============================================================================
 
-\begin{frame}{Visual Analytics Platform}
-    \textbf{Technology Stack}
-    \vspace{30pt}
+\begin{frame}{Technology Stack}
     \begin{columns}
         \begin{column}{0.48\textwidth}
             \textbf{Frontend}
@@ -164,45 +160,43 @@
 \end{frame}
 
 \begin{frame}{Architecture Overview}
-    FIX THIS, remove Interactive Visualizations and Spatial Aggregation, fix lines
     \centering
+    \vspace{10pt}
     \begin{tikzpicture}[
-        box/.style={rectangle, draw, thick, rounded corners=3pt, minimum height=1cm, minimum width=2.8cm, font=\scriptsize, align=center},
-        container/.style={rectangle, draw, thick, rounded corners=3pt, minimum height=4.5cm, minimum width=3.2cm, fill=blue!5},
-        arrow/.style={->, >=Stealth, very thick}
+        box/.style={rectangle, draw, thick, rounded corners=3pt, minimum height=1.2cm, minimum width=3cm, font=\small, align=center},
+        container/.style={rectangle, draw=blue!60, line width=1.5pt, rounded corners=5pt, minimum height=5cm, minimum width=3.75cm, fill=blue!5},
+        arrow/.style={->, >=Stealth, line width=1.2pt}
     ]
         % Frontend Container
         \node[container] (frontend_box) at (0,0) {};
-        \node[font=\bfseries\small, anchor=north] at (frontend_box.north) [yshift=-0.25cm] {Frontend};
-        \node[box, fill=orange!20] (react) at (0,0.6) {React\\+ D3.js};
-        \node[box, fill=orange!20] (nginx) at (0,-0.5) {Nginx};
-        \node[box, fill=orange!20] (viz) at (0,-1.5) {Interactive\\Visualizations};
+        \node[font=\bfseries\normalsize, anchor=north, text=blue!70!black] at (frontend_box.north) [yshift=-0.3cm] {Frontend};
+        \node[box, fill=orange!30] (react) at (0,0.3) {React + D3.js};
+        \node[box, fill=orange!20] (nginx) at (0,-1.5) {Nginx};
 
         % Backend Container
-        \node[container] (backend_box) at (5,0) {};
-        \node[font=\bfseries\small, anchor=north] at (backend_box.north) [yshift=-0.25cm] {Backend};
-        \node[box, fill=green!20] (express) at (5,0.6) {Express\\API};
-        \node[box, fill=green!20] (endpoints) at (5,-0.5) {REST\\Endpoints};
-        \node[box, fill=green!20] (aggregation) at (5,-1.5) {Spatial\\Aggregation};
+        \node[container] (backend_box) at (4.5,0) {};
+        \node[font=\bfseries\normalsize, anchor=north, text=blue!70!black] at (backend_box.north) [yshift=-0.3cm] {Backend};
+        \node[box, fill=green!30, minimum height=3.2cm] (express) at (4.5,-0.7) {\raisebox{2cm}{Express.js}};
+        \node[box, fill=green!20, minimum width=2cm] (processing) at (4.5,-1.5) {Data Processing};
 
         % Database Container
-        \node[container, minimum height=3.5cm] (db_box) at (10,0) {};
-        \node[font=\bfseries\small, anchor=north] at (db_box.north) [yshift=-0.25cm] {Database};
-        \node[box, fill=purple!20] (postgres) at (10,0.3) {PostgreSQL};
-        \node[box, fill=purple!20] (postgis) at (10,-1) {PostGIS\\Extension};
+        \node[container] (db_box) at (9,0) {};
+        \node[font=\bfseries\normalsize, anchor=north, text=blue!70!black] at (db_box.north) [yshift=-0.3cm] {Database};
+        \node[box, fill=purple!30] (postgres) at (9,0.3) {PostgreSQL};
+        \node[box, fill=purple!20] (postgis) at (9,-1.5) {PostGIS};
 
         % Arrows
-        \draw[arrow] (react) -- (nginx);
-        \draw[arrow] (nginx.east) -- (express.west) node[midway, above, font=\tiny] {HTTP};
-        \draw[arrow] (express.east) -- (postgres.west) node[midway, above, font=\tiny] {SQL};
-        \draw[arrow, dashed] (postgres.west) -- (express.east) node[midway, below, font=\tiny] {JSON};
-        \draw[arrow, dashed] (express.west) -- (nginx.east);
-        \draw[arrow, dashed] (nginx.west) -- (react.east);
-    \end{tikzpicture}
+        \draw[<->, >=Stealth, line width=0.8pt, gray] (nginx.north) -- (react.south);
+        \draw[<->, >=Stealth, line width=0.8pt, gray] (postgis.north) -- (postgres.south);
+        
+        \draw[<->, >=Stealth, line width=1.2pt, black, dashed] (express.west) -- (nginx.east);
+        \draw[<->, >=Stealth, line width=1.2pt, black, dashed] (express.east) -- (postgis.west);
 
-    \vspace{0.5cm}
-    \small
-    Dockerized deployment with Nginx reverse proxy for API routing
+        % Docker overlay
+        \node[draw=gray!60, line width=2pt, rounded corners=8pt, fit={(frontend_box)(backend_box)(db_box)}, inner ysep=0.6cm, inner xsep=0.4cm, fill=none, dashed, yshift=-0.2cm] (docker) {};
+        \node[anchor=north, font=\scriptsize\bfseries, text=gray!70] at (docker.south) [yshift=0.6cm] {\faDocker\hspace{0.2cm}Docker Compose};
+
+    \end{tikzpicture}
 \end{frame}
 
 % ==============================================================================
@@ -224,8 +218,9 @@
 
 \begin{frame}{Visualization 1: Spatial Heatmap}
     \centering
+    \vspace{15pt}
     %\includemovie{5cm}{5cm}{img/heatmap.mp4}
-    \includegraphics[width=0.9\textwidth,height=0.8\textheight,keepaspectratio]{img/morning_rush_hour_activity.png}
+    \includegraphics[height=0.99\textheight,keepaspectratio]{img/morning_rush_hour_activity.png}
 \end{frame}
 
 
@@ -251,7 +246,7 @@
         \end{column}
         \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{img/interest_group_homogeneity.png}
+            \includegraphics[width=\textwidth,keepaspectratio]{img/interest_group_homogeneity.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -297,7 +292,7 @@
 
 \begin{frame}{Visualization 2: Activity Streamgraph}
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.8\textheight,keepaspectratio]{img/activity_streamgraph.png}
+    \includegraphics[width=0.99\textwidth,keepaspectratio]{img/activity_streamgraph.png}
 \end{frame}
 
 
@@ -310,8 +305,8 @@
                 \item Reveal behavioral shifts
                 \item Track participation trends
             \end{itemize}
-
-            \vspace{15pt}
+        \end{column}
+        \begin{column}{0.48\textwidth}
             \textbf{Key Features}
             \begin{itemize}
                 \item Stacked area chart with smooth interpolation
@@ -320,11 +315,10 @@
                 \item Color-coded activity categories
             \end{itemize}
         \end{column}
-        \begin{column}{0.48\textwidth}
-            \centering
-            \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{img/18_diverse_activity.png}
-        \end{column}
     \end{columns}
+    \vspace{15pt}
+                \centering
+            \includegraphics[height=0.40\textheight,keepaspectratio]{img/18_diverse_activity.png}
 \end{frame}
 
 \begin{frame}{Activity Streamgraph - Evaluation}
@@ -367,7 +361,8 @@
 
 \begin{frame}{Visualization 3: Activity Calendar}
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.8\textheight,keepaspectratio]{img/participant_845_activity_calendar.png}
+    \vspace{10pt}
+    \includegraphics[height=0.99\textheight,keepaspectratio]{img/participant_845_activity_calendar.png}
 \end{frame}
 
 \begin{frame}{Activity Calendar - Purpose \& Features}
@@ -391,7 +386,7 @@
         \end{column}
         \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{img/participant_744_calendar.png}
+            \includegraphics[width=0.80\textwidth,keepaspectratio]{img/participant_744_calendar.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -437,7 +432,8 @@
 
 \begin{frame}{Visualization 4: Building Polygons Overlay}
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.8\textheight,keepaspectratio]{img/engagement.png}
+    \vspace{15pt}
+    \includegraphics[height=0.99\textheight,keepaspectratio]{img/engagement.png}
 \end{frame}
 
 \begin{frame}{Building Polygons - Purpose \& Features}
@@ -460,7 +456,7 @@
         \end{column}
         \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{img/residential_buildings_map.png}
+            \includegraphics[width=\textwidth,keepaspectratio]{img/residential_buildings_map.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -504,7 +500,8 @@
 
 \begin{frame}{Visualization 5: Participant Comparison}
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.8\textheight,keepaspectratio]{img/participant_comparison.png}
+    \vspace{15pt}
+    \includegraphics[width=0.99\textwidth,keepaspectratio]{img/participant_comparison.png}
 \end{frame}
 
 
@@ -517,9 +514,9 @@
                 \item Identify contrasting lifestyles
                 \item Support hypothesis about proximity and well-being
             \end{itemize}
-
-            \vspace{15pt}
-            \textbf{Key Features}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+                        \textbf{Key Features}
             \begin{itemize}
                 \item Daily travel distance
                 \item Average joviality score
@@ -527,10 +524,6 @@
                 \item Work patterns
                 \item Demographics
             \end{itemize}
-        \end{column}
-        \begin{column}{0.48\textwidth}
-            \centering
-            \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{img/participant_comparison.png}
         \end{column}
     \end{columns}
 \end{frame}
