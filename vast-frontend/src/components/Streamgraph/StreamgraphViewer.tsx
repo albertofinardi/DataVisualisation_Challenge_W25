@@ -39,7 +39,9 @@ export function StreamgraphViewer() {
   const [startTime, setStartTime] = useState("03:00");
   const [endDate, setEndDate] = useState("2022-03-22");
   const [endTime, setEndTime] = useState("03:00");
-  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>([]);
+  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>(
+    [...STREAMGRAPH_CONFIG.interestGroups]
+  );
 
   const timeBucketMinutes = TIME_BUCKET_OPTIONS[timeBucketIndex].value;
 
@@ -65,19 +67,20 @@ export function StreamgraphViewer() {
   };
 
   const handleInterestGroupToggle = (group: string) => {
-    setSelectedInterestGroups((prev) =>
-      prev.includes(group)
+    setSelectedInterestGroups((prev) => {
+      // If trying to deselect and it's the last selected group, don't allow it
+      if (prev.includes(group) && prev.length === 1) {
+        return prev;
+      }
+      return prev.includes(group)
         ? prev.filter((g) => g !== group)
-        : [...prev, group]
-    );
+        : [...prev, group];
+    });
   };
 
   const handleSelectAllInterestGroups = () => {
-    if (selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length) {
-      setSelectedInterestGroups([]);
-    } else {
-      setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
-    }
+    // Only allow toggling to "all selected", not to "none selected"
+    setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
   };
 
   // Check if date range is valid (at least as long as the time bucket)
@@ -207,10 +210,9 @@ export function StreamgraphViewer() {
                   size="sm"
                   onClick={handleSelectAllInterestGroups}
                   className="h-8 text-xs"
+                  disabled={selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length}
                 >
-                  {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
-                    ? 'Deselect All'
-                    : 'Select All'}
+                  Select All
                 </Button>
               </div>
               <div className="grid grid-cols-5 gap-3 p-4 border rounded-lg bg-muted/30">
@@ -231,8 +233,8 @@ export function StreamgraphViewer() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {selectedInterestGroups.length === 0
-                  ? 'All interest groups will be included'
+                {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
+                  ? 'All interest groups selected'
                   : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''}`}
               </p>
             </div>

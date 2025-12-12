@@ -34,7 +34,9 @@ export function HeatmapViewer() {
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState("2022-03-22");
   const [endTime, setEndTime] = useState("00:00");
-  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>([]);
+  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>(
+    [...STREAMGRAPH_CONFIG.interestGroups]
+  );
   const [showBuildings, setShowBuildings] = useState(false);
   const [buildingData, setBuildingData] = useState<BuildingPolygonData[]>([]);
   const [useGroupColors, setUseGroupColors] = useState(false);
@@ -105,19 +107,20 @@ export function HeatmapViewer() {
   };
 
   const handleInterestGroupToggle = (group: string) => {
-    setSelectedInterestGroups((prev) =>
-      prev.includes(group)
+    setSelectedInterestGroups((prev) => {
+      // If trying to deselect and it's the last selected group, don't allow it
+      if (prev.includes(group) && prev.length === 1) {
+        return prev;
+      }
+      return prev.includes(group)
         ? prev.filter((g) => g !== group)
-        : [...prev, group]
-    );
+        : [...prev, group];
+    });
   };
 
   const handleSelectAllInterestGroups = () => {
-    if (selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length) {
-      setSelectedInterestGroups([]);
-    } else {
-      setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
-    }
+    // Only allow toggling to "all selected", not to "none selected"
+    setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
   };
 
   const handleCellClick = (cell: { grid_x: number; grid_y: number }) => {
@@ -197,10 +200,9 @@ export function HeatmapViewer() {
                   size="sm"
                   onClick={handleSelectAllInterestGroups}
                   className="h-8 text-xs"
+                  disabled={selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length}
                 >
-                  {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
-                    ? 'Deselect All'
-                    : 'Select All'}
+                  Select All
                 </Button>
               </div>
               <div className="grid grid-cols-5 gap-3 p-4 border rounded-lg bg-muted/30">
@@ -221,9 +223,9 @@ export function HeatmapViewer() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {selectedInterestGroups.length === 0
-                  ? 'All interest groups will be included'
-                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''} with distinct color scales`}
+                {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
+                  ? 'All interest groups selected'
+                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''}`}
               </p>
             </div>
           </div>
