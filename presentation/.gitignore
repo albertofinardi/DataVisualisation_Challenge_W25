@@ -1,0 +1,16 @@
+# Ignore everything by default
+*
+
+# Allow .sty, .pdf, and .tex files
+!*.sty
+!*.pdf
+!*.tex
+
+# Allow img and asset directories and their contents
+!img/
+!img/**
+!asset/
+!asset/**
+
+# Allow .gitignore itself
+!.gitignore
