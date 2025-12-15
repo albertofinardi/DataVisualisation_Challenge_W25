@@ -49,8 +49,10 @@ export const MAP_CONFIG = {
     // Options: 'coral' (warm, energetic), 'slate' (cool, professional), 'mixed' (balanced)
     defaultColorScheme: 'coral' as ColorScheme,
 
+    buildingOpacity: 0.25,
+
     // Opacity for heatmap cells
-    opacity: 0.85,
+    opacity: 1,
 
     // Minimum count to display a cell (filter out noise)
     minCount: 1,
@@ -65,6 +67,6 @@ export const MAP_CONFIG = {
 
   // API settings
   api: {
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'http://localhost:3001/api',
   },
 } as const;

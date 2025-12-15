@@ -4,6 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 
+// Time bucket options: minutes
+const TIME_BUCKET_OPTIONS = [
+  { label: '15 mins', value: 15 },
+  { label: '30 mins', value: 30 },
+  { label: '1 hour', value: 60 },
+  { label: '6 hours', value: 360 },
+  { label: '12 hours', value: 720 },
+  { label: '24 hours', value: 1440 },
+  { label: '7 days', value: 10080 },
+  { label: '1 month', value: 43200 },
+];
+
 export interface SettingsPanelProps {
   startDate: string;
   setStartDate: (v: string) => void;
@@ -15,11 +27,14 @@ export interface SettingsPanelProps {
   setEndTime: (v: string) => void;
   cellSize: number;
   setCellSize: (v: number) => void;
-  timeBucketMinutes: number;
-  setTimeBucketMinutes: (v: number) => void;
+  timeBucketIndex: number;
+  setTimeBucketIndex: (v: number) => void;
   handleApplySettings: () => void;
   handleCancel: () => void;
+  canApplySettings?: boolean;
 }
+
+export { TIME_BUCKET_OPTIONS };
 
 export function SettingsPanel({
   startDate,
@@ -32,10 +47,11 @@ export function SettingsPanel({
   setEndTime,
   cellSize,
   setCellSize,
-  timeBucketMinutes,
-  setTimeBucketMinutes,
+  timeBucketIndex,
+  setTimeBucketIndex,
   handleApplySettings,
   handleCancel,
+  canApplySettings = true,
 }: SettingsPanelProps) {
   return (
     <div className="w-full space-y-6">
@@ -108,25 +124,39 @@ export function SettingsPanel({
         <Label className="flex items-center justify-between text-sm font-medium">
           <span className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
-            Time Bucket (minutes)
+            Time Bucket
           </span>
-          <span className="text-accent font-semibold">{timeBucketMinutes}</span>
+          <span className="text-accent font-semibold">{TIME_BUCKET_OPTIONS[timeBucketIndex].label}</span>
         </Label>
         <Slider
-          value={[timeBucketMinutes]}
-          onValueChange={(v) => setTimeBucketMinutes(v[0])}
-          min={1}
-          max={120}
+          value={[timeBucketIndex]}
+          onValueChange={(v) => setTimeBucketIndex(v[0])}
+          min={0}
+          max={TIME_BUCKET_OPTIONS.length - 1}
           step={1}
           className="w-full"
         />
+        <p className="text-xs text-muted-foreground">
+          Aggregate data into {TIME_BUCKET_OPTIONS[timeBucketIndex].label} intervals
+        </p>
       </div>
+
+      {/* Validation Message */}
+      {!canApplySettings && (
+        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+          <p className="text-sm text-destructive">
+            Date range must be at least 2x {TIME_BUCKET_OPTIONS[timeBucketIndex].label} long.
+            Current selection is too short for the selected time bucket.
+          </p>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
         <Button
           onClick={handleApplySettings}
           className="flex-1 bg-accent hover:bg-accent/90"
+          disabled={!canApplySettings}
         >
           Apply Settings
         </Button>

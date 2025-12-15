@@ -20,6 +20,8 @@ export function ParticipantComparisonViewer() {
   const [endTime, setEndTime] = useState("23:59");
   const [participant1, setParticipant1] = useState<string>("1");
   const [participant2, setParticipant2] = useState<string>("2");
+  const [displayedParticipant1, setDisplayedParticipant1] = useState<string>("1");
+  const [displayedParticipant2, setDisplayedParticipant2] = useState<string>("2");
   const trailLength = 50;
 
   const { data, loading, error, fetchData } = useParticipantComparison();
@@ -27,18 +29,20 @@ export function ParticipantComparisonViewer() {
   const handleApplySettings = () => {
     const p1 = parseInt(participant1);
     const p2 = parseInt(participant2);
-    
+
     if (isNaN(p1) || isNaN(p2) || p1 < 1 || p1 > 1011 || p2 < 1 || p2 > 1011) {
       alert('Please enter valid participant IDs (1-1011)');
       return;
     }
-    
+
     if (p1 === p2) {
       alert('Please select two different participants');
       return;
     }
-    
+
     setShowDataConfig(false);
+    setDisplayedParticipant1(participant1);
+    setDisplayedParticipant2(participant2);
     fetchData({
       participant1: p1,
       participant2: p2,
@@ -50,10 +54,10 @@ export function ParticipantComparisonViewer() {
   };
 
   // Get max timeline length for playback
-  const maxTimelineLength = data 
+  const maxTimelineLength = data
     ? Math.max(
-        data.participants[participant1]?.timeline?.length || 0,
-        data.participants[participant2]?.timeline?.length || 0
+        data.participants[displayedParticipant1]?.timeline?.length || 0,
+        data.participants[displayedParticipant2]?.timeline?.length || 0
       )
     : 0;
 
@@ -83,8 +87,8 @@ export function ParticipantComparisonViewer() {
   }
 
   const hasData = data !== null;
-  const p1Data = hasData ? data.participants[participant1] : null;
-  const p2Data = hasData ? data.participants[participant2] : null;
+  const p1Data = hasData ? data.participants[displayedParticipant1] : null;
+  const p2Data = hasData ? data.participants[displayedParticipant2] : null;
 
   // Get current timestamp
   const getCurrentTimestamp = () => {
@@ -319,7 +323,7 @@ export function ParticipantComparisonViewer() {
               {/* Left Panel - Participant 1 Info */}
               <div className="xl:col-span-3">
                 <ParticipantInfoPanel
-                  participantId={participant1}
+                  participantId={displayedParticipant1}
                   info={p1Data.info}
                   activityDistribution={p1Data.activityDistribution}
                   totalDistance={p1Data.totalDistance}
@@ -335,8 +339,8 @@ export function ParticipantComparisonViewer() {
                       participant2Timeline={p2Data.timeline}
                       currentTimeIndex={currentTimeIndex}
                       trailLength={trailLength}
-                      participant1Id={participant1}
-                      participant2Id={participant2}
+                      participant1Id={displayedParticipant1}
+                      participant2Id={displayedParticipant2}
                     />
                   </CardContent>
                 </Card>
@@ -345,7 +349,7 @@ export function ParticipantComparisonViewer() {
               {/* Right Panel - Participant 2 Info */}
               <div className="xl:col-span-3">
                 <ParticipantInfoPanel
-                  participantId={participant2}
+                  participantId={displayedParticipant2}
                   info={p2Data.info}
                   activityDistribution={p2Data.activityDistribution}
                   totalDistance={p2Data.totalDistance}

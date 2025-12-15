@@ -4,66 +4,45 @@ import type { BuildingType } from '../types/buildings.types';
  * Color palette for building types
  * Colors are chosen to be distinct and semantically meaningful
  */
-export const BUILDING_COLORS: Record<BuildingType, { light: string; dark: string }> = {
-  Pub: {
-    light: '#f59e0b', // Amber - warm, social
-    dark: '#fbbf24',
-  },
-  Restaurant: {
-    light: '#ef4444', // Red - dining, food
-    dark: '#f87171',
-  },
-  Apartment: {
-    light: '#3b82f6', // Blue - residential, calm
-    dark: '#60a5fa',
-  },
-  Employer: {
-    light: '#8b5cf6', // Purple - professional, corporate
-    dark: '#a78bfa',
-  },
-  School: {
-    light: '#10b981', // Green - education, growth
-    dark: '#34d399',
-  },
+export const BUILDING_COLORS: Record<BuildingType, string> = {
+  Pub: '#f59e0b', // Amber - warm, social
+  Restaurant: '#ef4444', // Red - dining, food
+  Apartment: '#3b82f6', // Blue - residential, calm
+  Employer: '#8b5cf6', // Purple - professional, corporate
+  School: '#10b981', // Green - education, growth
 };
 
 /**
  * Hover/highlight colors
  */
 export const BUILDING_INTERACTION_COLORS = {
-  hover: {
-    light: '#fbbf24', // Bright amber
-    dark: '#fcd34d',
-  },
-  selected: {
-    light: '#dc2626', // Bright red
-    dark: '#ef4444',
-  },
+  hover: '#fbbf24', // Bright amber
+  selected: '#dc2626', // Bright red
 };
 
 /**
- * Get color for a building type based on theme
+ * Get color for a building type
  */
-export const getBuildingColor = (type: BuildingType, theme: 'light' | 'dark' = 'light'): string => {
+export const getBuildingColor = (type: BuildingType): string => {
   // Fallback to a neutral gray if type is undefined or not found
   if (!type || !BUILDING_COLORS[type]) {
-    return theme === 'dark' ? '#6b7280' : '#9ca3af';
+    return '#9ca3af';
   }
-  return BUILDING_COLORS[type][theme];
+  return BUILDING_COLORS[type];
 };
 
 /**
- * Get hover color based on theme
+ * Get hover color
  */
-export const getHoverColor = (theme: 'light' | 'dark' = 'light'): string => {
-  return BUILDING_INTERACTION_COLORS.hover[theme];
+export const getHoverColor = (): string => {
+  return BUILDING_INTERACTION_COLORS.hover;
 };
 
 /**
- * Get selected color based on theme
+ * Get selected color
  */
-export const getSelectedColor = (theme: 'light' | 'dark' = 'light'): string => {
-  return BUILDING_INTERACTION_COLORS.selected[theme];
+export const getSelectedColor = (): string => {
+  return BUILDING_INTERACTION_COLORS.selected;
 };
 
 /**

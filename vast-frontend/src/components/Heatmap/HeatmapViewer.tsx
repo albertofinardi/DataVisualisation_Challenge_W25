@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Heatmap } from "./Heatmap";
 import { LoadingSpinner } from "../LoadingSpinner";
-import { SettingsPanel } from "../SettingsPanel";
+import { SettingsPanel, TIME_BUCKET_OPTIONS } from "../SettingsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
@@ -23,20 +23,25 @@ import { usePlayback } from "@/hooks/usePlayback";
 import { STREAMGRAPH_CONFIG } from "@/config/streamgraph.config";
 import { api } from "@/services/api";
 import type { BuildingPolygonData } from "@/types/buildings.types";
+import { cn } from "@/lib/utils";
 
 export function HeatmapViewer() {
   const [showDataConfig, setShowDataConfig] = useState(true);
   const [useConstantScale, setUseConstantScale] = useState(false);
   const [cellSize, setCellSize] = useState(25);
-  const [timeBucketMinutes, setTimeBucketMinutes] = useState(30);
+  const [timeBucketIndex, setTimeBucketIndex] = useState(1); // Default to 30 mins (index 1)
   const [startDate, setStartDate] = useState("2022-03-21");
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState("2022-03-22");
   const [endTime, setEndTime] = useState("00:00");
-  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>([]);
+  const [selectedInterestGroups, setSelectedInterestGroups] = useState<string[]>(
+    [...STREAMGRAPH_CONFIG.interestGroups]
+  );
   const [showBuildings, setShowBuildings] = useState(false);
   const [buildingData, setBuildingData] = useState<BuildingPolygonData[]>([]);
   const [useGroupColors, setUseGroupColors] = useState(false);
+
+  const timeBucketMinutes = TIME_BUCKET_OPTIONS[timeBucketIndex].value;
 
   const {
     heatmapData,
@@ -78,6 +83,16 @@ export function HeatmapViewer() {
   const currentTimestamp = timestamps[currentTimeIndex];
   const currentData = currentTimestamp ? heatmapData[currentTimestamp] : [];
 
+  // Check if date range is valid (at least as long as the time bucket)
+  const isDateRangeValid = () => {
+    const start = new Date(`${startDate}T${startTime}:00`);
+    const end = new Date(`${endDate}T${endTime}:00`);
+    const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+    return diffMinutes >= timeBucketMinutes * 2;
+  };
+
+  const canApplySettings = isDateRangeValid();
+
   const handleApplySettings = () => {
     setShowDataConfig(false);
     fetchData({
@@ -92,19 +107,20 @@ export function HeatmapViewer() {
   };
 
   const handleInterestGroupToggle = (group: string) => {
-    setSelectedInterestGroups((prev) =>
-      prev.includes(group)
+    setSelectedInterestGroups((prev) => {
+      // If trying to deselect and it's the last selected group, don't allow it
+      if (prev.includes(group) && prev.length === 1) {
+        return prev;
+      }
+      return prev.includes(group)
         ? prev.filter((g) => g !== group)
-        : [...prev, group]
-    );
+        : [...prev, group];
+    });
   };
 
   const handleSelectAllInterestGroups = () => {
-    if (selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length) {
-      setSelectedInterestGroups([]);
-    } else {
-      setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
-    }
+    // Only allow toggling to "all selected", not to "none selected"
+    setSelectedInterestGroups([...STREAMGRAPH_CONFIG.interestGroups]);
   };
 
   const handleCellClick = (cell: { grid_x: number; grid_y: number }) => {
@@ -166,10 +182,11 @@ export function HeatmapViewer() {
               setEndTime={setEndTime}
               cellSize={cellSize}
               setCellSize={setCellSize}
-              timeBucketMinutes={timeBucketMinutes}
-              setTimeBucketMinutes={setTimeBucketMinutes}
+              timeBucketIndex={timeBucketIndex}
+              setTimeBucketIndex={setTimeBucketIndex}
               handleApplySettings={handleApplySettings}
               handleCancel={() => setShowDataConfig(false)}
+              canApplySettings={canApplySettings}
             />
 
             {/* Interest Groups Filter */}
@@ -183,10 +200,9 @@ export function HeatmapViewer() {
                   size="sm"
                   onClick={handleSelectAllInterestGroups}
                   className="h-8 text-xs"
+                  disabled={selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length}
                 >
-                  {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
-                    ? 'Deselect All'
-                    : 'Select All'}
+                  Select All
                 </Button>
               </div>
               <div className="grid grid-cols-5 gap-3 p-4 border rounded-lg bg-muted/30">
@@ -207,9 +223,9 @@ export function HeatmapViewer() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {selectedInterestGroups.length === 0
-                  ? 'All interest groups will be included'
-                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''} with distinct color scales`}
+                {selectedInterestGroups.length === STREAMGRAPH_CONFIG.interestGroups.length
+                  ? 'All interest groups selected'
+                  : `Showing data for ${selectedInterestGroups.length} selected group${selectedInterestGroups.length !== 1 ? 's' : ''}`}
               </p>
             </div>
           </div>
@@ -277,7 +293,7 @@ export function HeatmapViewer() {
 
                   {/* Visualization Settings */}
                   <div className="border-t pt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className={cn("grid grid-cols-1 gap-4", useGroupColors ? "md:grid-cols-2" : "md:grid-cols-3")}>
                       {/* Playback Speed */}
                       <div className="space-y-2">
                         <Label className="flex items-center justify-between text-sm font-medium">
@@ -296,21 +312,23 @@ export function HeatmapViewer() {
                         />
                       </div>
 
-                      {/* Constant Scale Toggle */}
-                      <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">
-                        <div className="space-y-0.5">
-                          <Label className="text-sm font-medium">
-                            Constant Scale
-                          </Label>
-                          <p className="text-xs text-muted-foreground">
-                            Use consistent color scale across all frames
-                          </p>
+                      {/* Constant Scale Toggle - Hidden when using separate group colors */}
+                      {!useGroupColors && (
+                        <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">
+                          <div className="space-y-0.5">
+                            <Label className="text-sm font-medium">
+                              Constant Scale
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Use consistent color scale across all frames
+                            </p>
+                          </div>
+                          <Switch
+                            checked={useConstantScale}
+                            onCheckedChange={setUseConstantScale}
+                          />
                         </div>
-                        <Switch
-                          checked={useConstantScale}
-                          onCheckedChange={setUseConstantScale}
-                        />
-                      </div>
+                      )}
 
                       {/* Show Buildings Toggle */}
                       <div className="flex items-center justify-between py-2 px-4 bg-slate-light dark:bg-slate-light/10 rounded-lg border border-border">

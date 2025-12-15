@@ -243,10 +243,6 @@ export function Streamgraph({
       .attr('dy', '.15em')
       .attr('transform', 'rotate(-45)');
 
-    // Add Y axis
-    const yAxis = d3.axisLeft(yScale).ticks(5);
-    g.append('g').attr('class', 'y-axis').call(yAxis);
-
     // Add axis labels
     g.append('text')
       .attr('class', 'x-axis-label')

@@ -16,6 +16,7 @@ export function ActivityCalendarViewer() {
   const [endDate, setEndDate] = useState("2022-03-31");
   const [endTime, setEndTime] = useState("23:59");
   const [selectedParticipant, setSelectedParticipant] = useState<string>("1");
+  const [displayedParticipant, setDisplayedParticipant] = useState<string>("1");
 
   const {
     calendarData,
@@ -26,6 +27,7 @@ export function ActivityCalendarViewer() {
 
   const handleApplySettings = () => {
     setShowDataConfig(false);
+    setDisplayedParticipant(selectedParticipant);
     fetchData({
       startDate,
       startTime,
@@ -179,7 +181,7 @@ export function ActivityCalendarViewer() {
             <CardContent className="pt-6">
               <div className="mb-4">
                 <h2 className="text-xl font-semibold">
-                  Participant {selectedParticipant}
+                  Participant {displayedParticipant}
                 </h2>
               </div>
               <ActivityCalendar data={calendarData} />
