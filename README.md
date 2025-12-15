@@ -63,8 +63,8 @@ For local development:
    ```
 
 3. **Access the application:**
-   - **Frontend:** http://localhost
-   - **Backend API** (for Bruno/testing): http://localhost:3000
+   - **Frontend:** http://localhost:8123
+   - **Backend API** (for Bruno/testing): http://localhost:3001
 
    The frontend includes an Nginx reverse proxy that forwards all `/api/*` requests to the backend.
 
@@ -136,7 +136,7 @@ And upload the chunks in a new release.
 │  Frontend (Nginx) Container             │
 │  - Serves React app                     │
 │  - Proxies /api/* to backend            │
-│  Port 80 (exposed)                      │
+│  Port 8123 (80 internal)                │
 └────────────┬────────────────────────────┘
              │ Internal Network
              ▼
@@ -144,7 +144,7 @@ And upload the chunks in a new release.
 │  Backend (Node.js) Container            │
 │  - Express REST API                     │
 │  - Auto-initializes DB on first run     │
-│  Port 3000 (internal only)              │
+│  Port 3001 (3000 internal)              │
 └────────────┬────────────────────────────┘
              │ Internal Network
              ▼
