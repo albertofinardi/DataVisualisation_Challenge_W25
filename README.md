@@ -2,6 +2,11 @@
 
 This project consists of a PostgreSQL database, Node.js backend API, and React frontend for visualizing VAST Challenge data.
 
+## Deliverables
+
+- **Answer Sheet (HTML):** [index.html](index.html)
+- **Answer Sheet (PDF):** [index.pdf](index.pdf)
+
 ## Project Structure
 
 ```
@@ -34,13 +39,28 @@ For local development:
 
 ## Quick Start with Docker
 
-1. **Import data:**
-  See more info in the next sections
+### First Time Setup
+
+**IMPORTANT:** Before starting the services, you MUST import the database. The application will not work without data.
+
+1. **Import the database** (choose one method):
+
+   **Option A - Using Database Dump (RECOMMENDED - takes ~2 minutes):**
+   ```bash
+   # Download and reconstruct the dump from GitHub Releases
+   cat vast_db_dump_split_* > restored_dump.sql.gz
+
+   # Import the database
+   ./restore-database.sh restored_dump.sql.gz
+   ```
+
+   **Option B - From CSV files (takes 10-15 minutes):**
+   See the CSV import section below for detailed instructions.
 
 2. **Start services:**
-```bash
-docker compose up --build -d
-```
+   ```bash
+   docker compose up --build -d
+   ```
 
 3. **Access the application:**
    - **Frontend:** http://localhost
@@ -52,16 +72,18 @@ docker compose up --build -d
 
    A Bruno API collection is included in the `/bruno-endpoints/` folder with example requests for all endpoints. Import this collection into [Bruno](https://www.usebruno.com/) to quickly test the API.
 
-5. **Stop all services:**
-   ```bash
-   docker-compose down
-   ```
+### Managing Services
 
-6. **Complete cleanup (including database):**
-   ```bash
-   docker-compose down -v
-   ```
-   **⚠️ WARNING:** This will delete all Docker volumes, including the database. The next startup will require a **full re-import of all data** and will consume disk space again.
+**Stop all services:**
+```bash
+docker-compose down
+```
+
+**Complete cleanup (including database):**
+```bash
+docker-compose down -v
+```
+**WARNING:** This will delete all Docker volumes, including the database. You will need to **re-import the database** following step 1 above before the application will work again.
 
 ## Database Export/Import (RECOMMENDED)
 
